@@ -1,8 +1,12 @@
 # Fineli AI — Ruokapäiväkirja
 
-A Finnish food diary app powered by the [Fineli](https://fineli.fi) food database. Log meals via natural language (e.g. “kaurapuuroa ja maitoa”), get nutrient summaries, and export to Excel.
+[![CI](https://github.com/jaakkos/fineli-ai/actions/workflows/deploy.yml/badge.svg)](https://github.com/jaakkos/fineli-ai/actions/workflows/deploy.yml)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/jaakkos/fineli-ai)
+
+A Finnish food diary app powered by the [Fineli](https://fineli.fi) food database. Log meals via natural language (e.g. "kaurapuuroa ja maitoa"), get nutrient summaries, and export to Excel.
 
 - **Tech:** Next.js 16, React 19, Drizzle ORM, PostgreSQL (or SQLite for local dev), Tailwind CSS
+- **Privacy:** [Tietosuojaseloste / Privacy Policy](src/app/tietosuoja/page.tsx)
 - **License:** [MIT](LICENSE)
 
 ## Prerequisites
@@ -105,8 +109,8 @@ When deployed, you can allow **only magic link login** (no anonymous users):
    - `NEXT_PUBLIC_REQUIRE_MAGIC_LINK=true`
    - `NEXT_PUBLIC_APP_URL` = your Render service URL (e.g. `https://fineli-ai.onrender.com`)
 
-2. **Sending email:** Render’s free tier [blocks outbound SMTP](https://render.com/changelog/free-web-services-will-no-longer-allow-outbound-traffic-to-smtp-ports). Use an HTTP-based provider instead:
-   - **[Resend](https://resend.com)** (recommended): free tier 3,000 emails/month. Sign up, create an API key, add `RESEND_API_KEY` to the Web Service. Optionally set `RESEND_FROM` (e.g. `Ruokapäiväkirja <noreply@yourdomain.com>`); otherwise Resend’s default sender is used.
+2. **Sending email:** Render's free tier [blocks outbound SMTP](https://render.com/changelog/free-web-services-will-no-longer-allow-outbound-traffic-to-smtp-ports). Use an HTTP-based provider instead:
+   - **[Resend](https://resend.com)** (recommended): free tier 3,000 emails/month. Sign up, create an API key, add `RESEND_API_KEY` to the Web Service. Optionally set `RESEND_FROM` (e.g. `Ruokapäiväkirja <noreply@yourdomain.com>`); otherwise Resend's default sender is used.
    - Alternatives: SendGrid, Mailgun, Postmark (each has a free tier and HTTP API).
 
 Without `RESEND_API_KEY`, magic link emails are only logged in development; in production the API returns 503 until email is configured.
