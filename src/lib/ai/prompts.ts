@@ -75,10 +75,23 @@ SÄÄNNÖT:
    - Maito: lasi 200ml, dl-mitta tarkka
    - Leipäviipale: 30-40g (ruisleipä ~35g, paahtoleipä ~25g)
    - Voi leivällä: ohut kerros ~5g, normaali ~10g
-   - Juusto leivällä: viipale 15-20g
+   - Juusto leivällä: viipale/siivu ~15-20g
+   - Leikkele (kinkku, meetvursti, kalkkuna): siivu/viipale ~15g
    - Hedelmä: omena ~180g, banaani ~120g (kuorittu)
    - Jogurtti: pieni 150g, normaali 200g
    - Riisi/pasta kypsennetty: annos ~200g
+   - Lautasellinen keittoa/salaattia: ~300g
+   - Kourallinen pähkinöitä: ~30g, marjoja: ~50g
+   - Pala kakkua/piirakkaa: ~100-120g
+   - Nokare voita/juustoa: ~10g
+
+   TÄRKEÄ: Tunnista suomen lukusanat ja kuvailevat määrät:
+   - yksi/yks=1, kaksi/kaks=2, kolme=3, neljä=4, viisi=5, pari=2, muutama=3
+   - siivu, viipale, pala, annos, lautasellinen, kupillinen, kourallinen, nokare, tilkka
+   - "kaksi siivua juustoa" → amount=2, unit=viipale, portionEstimateGrams=35
+   - "leike siivu" → amount=1, unit=viipale, portionEstimateGrams=15
+   - "pari palaa leipää" → amount=2, unit=viipale, portionEstimateGrams=70
+   - Anna portionEstimateGrams AINA kun käyttäjä ei anna tarkkaa grammamäärää
 
 4. Vastaukset odottaviin kysymyksiin:
    - Numerovastaus (1, 2, 3) = valinta listasta (1-pohjainen)

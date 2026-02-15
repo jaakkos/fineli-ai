@@ -81,11 +81,28 @@ function aiResultToClassifiedIntent(
   switch (aiResult.intent) {
     case 'add_items': {
       const items: ParsedMealItem[] =
-        aiResult.items?.map((item) => ({
-          text: item.searchHint ?? item.text,
-          amount: item.amount,
-          unit: item.unit,
-        })) ?? parseMealText(originalMessage);
+        aiResult.items?.map((item) => {
+          // When the AI provides a gram estimate for descriptive quantities
+          // (e.g. "kaksi siivua juustoa" → portionEstimateGrams: 30),
+          // use it directly so the engine can auto-resolve without asking
+          // the user for a portion. Only apply when the unit isn't already 'g'.
+          if (
+            item.portionEstimateGrams != null &&
+            item.portionEstimateGrams > 0 &&
+            item.unit !== 'g'
+          ) {
+            return {
+              text: item.searchHint ?? item.text,
+              amount: item.portionEstimateGrams,
+              unit: 'g',
+            };
+          }
+          return {
+            text: item.searchHint ?? item.text,
+            amount: item.amount,
+            unit: item.unit,
+          };
+        }) ?? parseMealText(originalMessage);
       return { type: 'add_items', data: items };
     }
 

@@ -23,7 +23,7 @@ function toStr(d: Date): string {
 
 export default function DatePicker({ value, onChange }: DatePickerProps) {
   const date = toDate(value);
-  const displayDate = format(date, 'd.M.yyyy', { locale: fi });
+  const displayDate = format(date, 'EEEEEE d.M.yyyy', { locale: fi });
   const today = isToday(date);
 
   return (
@@ -42,7 +42,7 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
         role="status"
         aria-live="polite"
         aria-atomic="true"
-        className="min-w-[7rem] text-center text-sm font-medium text-gray-900"
+        className="min-w-[8.5rem] text-center text-sm font-medium text-gray-900"
       >
         {displayDate}
       </span>
