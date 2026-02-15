@@ -304,6 +304,7 @@ describe('PortionConverter edge cases', () => {
     const units = [
       { code: 'KPL_M', massGrams: 80, labelFi: 'kpl', labelEn: 'pcs' },
     ];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- partial FineliUnit for test
     const result = converter.convert(3, 'kappaletta', units as any);
     expect(result?.grams).toBe(240); // 3 * 80
   });
@@ -312,6 +313,7 @@ describe('PortionConverter edge cases', () => {
     const units = [
       { code: 'KPL_M', massGrams: 80, labelFi: 'kpl', labelEn: 'pcs' },
     ];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- partial FineliUnit for test
     const result = converter.convert(1, 'piece', units as any);
     expect(result?.grams).toBe(80);
   });
@@ -321,6 +323,7 @@ describe('PortionConverter edge cases', () => {
     const units = [
       { code: 'DL', massGrams: 60, labelFi: 'dl', labelEn: 'dl' },
     ];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- partial FineliUnit for test
     const result = converter.convert(2, 'dl', units as any);
     expect(result?.grams).toBe(120); // Fineli unit, not density
     expect(result?.method).toBe('fineli_unit');

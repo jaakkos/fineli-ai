@@ -33,12 +33,12 @@ export default function MealItemCard({
     ? Math.round((item.computedNutrients.ENERC ?? 0) * (pendingGrams / item.portionGrams))
     : Math.round(item.computedNutrients.ENERC ?? 0);
 
-  // Clear optimistic state when the server data catches up
-  useEffect(() => {
-    if (pendingGrams != null && Math.round(item.portionGrams) === Math.round(pendingGrams)) {
-      setPendingGrams(null);
-    }
-  }, [item.portionGrams, pendingGrams]);
+  // Clear optimistic state when the server data catches up.
+  // Adjusting state during render is the React-recommended pattern for
+  // deriving state from props (avoids an extra re-render from useEffect).
+  if (pendingGrams != null && Math.round(item.portionGrams) === Math.round(pendingGrams)) {
+    setPendingGrams(null);
+  }
 
   // Focus the input when entering edit mode
   useEffect(() => {

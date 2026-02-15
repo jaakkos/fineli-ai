@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
 
   const { mealId, message } = parsed.data;
   const db = await getDbUnified();
-  const raw = db.raw as any;
-  const s = db.schema as any;
+  const raw = db.raw;
+  const s = db.schema;
 
   // --- Auth & meal lookup (same as /api/chat/message) ---
   const meal = (await db.selectOne(

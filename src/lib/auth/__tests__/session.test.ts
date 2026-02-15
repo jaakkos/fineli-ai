@@ -15,6 +15,7 @@ describe('session — production SESSION_SECRET', () => {
   beforeEach(async () => {
     vi.resetModules();
     const { cookies } = await import('next/headers');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- partial mock of ReadonlyRequestCookies
     vi.mocked(cookies).mockResolvedValue({ get: () => undefined } as any);
   });
 
@@ -23,12 +24,14 @@ describe('session — production SESSION_SECRET', () => {
   });
 
   it('throws when NODE_ENV is production and SESSION_SECRET is missing', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- override readonly NODE_ENV for test
     (process.env as any).NODE_ENV = 'production';
     delete process.env.SESSION_SECRET;
 
     const { cookies } = await import('next/headers');
     vi.mocked(cookies).mockResolvedValue({
       get: () => ({ name: 'fineli_session', value: 'dummy-token-so-secret-is-called' }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- partial mock of ReadonlyRequestCookies
     } as any);
 
     const { getSession } = await import('../session');
@@ -39,6 +42,7 @@ describe('session — production SESSION_SECRET', () => {
   });
 
   it('returns null when no cookie and SESSION_SECRET is set in production', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- override readonly NODE_ENV for test
     (process.env as any).NODE_ENV = 'production';
     process.env.SESSION_SECRET = 'test-secret-at-least-32-chars-long';
 

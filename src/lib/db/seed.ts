@@ -10,8 +10,8 @@ import { eq } from 'drizzle-orm';
 async function seed() {
   if (isPostgres()) {
     const db = await getDbUnified();
-    const raw = db.raw as any;
-    const s = db.schema as any;
+    const raw = db.raw;
+    const s = db.schema;
     const existing = await db.selectOne(
       raw.select().from(s.exportTemplateVersions).where(
         eq(s.exportTemplateVersions.version, 'fineli-diary-v1')

@@ -100,7 +100,9 @@ describe('generateExport', () => {
     const sheet = wb.worksheets[0];
     expect(sheet.views).toHaveLength(1);
     expect(sheet.views[0].state).toBe('frozen');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- exceljs WorksheetView doesn't expose xSplit/ySplit in types
     expect((sheet.views[0] as any).xSplit).toBe(3);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((sheet.views[0] as any).ySplit).toBe(1);
   });
 

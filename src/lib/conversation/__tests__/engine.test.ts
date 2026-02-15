@@ -65,6 +65,7 @@ function mockFineliClient(searchResults: Record<string, FineliFood[]> = {}) {
     }),
     getFood: vi.fn(),
     getComponents: vi.fn(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- partial mock of FineliClient
   } as any;
 }
 
@@ -90,6 +91,7 @@ function mockPortionConverter() {
       }
       return null;
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- partial mock of PortionConverter
   } as any;
 }
 

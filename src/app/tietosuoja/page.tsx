@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Tietosuojaseloste – Ruokapäiväkirja',
@@ -8,9 +9,9 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-dvh bg-gray-50">
       <div className="mx-auto max-w-2xl px-4 py-10">
-        <a href="/" className="mb-6 inline-block text-sm text-blue-600 hover:underline">
+        <Link href="/" className="mb-6 inline-block text-sm text-blue-600 hover:underline">
           &larr; Takaisin
-        </a>
+        </Link>
 
         <h1 className="mb-6 text-2xl font-bold text-gray-900">Tietosuojaseloste</h1>
         <p className="mb-4 text-sm text-gray-500">Päivitetty 15.2.2026</p>

@@ -52,8 +52,8 @@ export async function GET(request: NextRequest) {
   }
 
   const db = await getDbUnified();
-  const raw = db.raw as any;
-  const s = db.schema as any;
+  const raw = db.raw;
+  const s = db.schema;
 
   const days = (await db.selectAll(
     raw.select().from(s.diaryDays).where(

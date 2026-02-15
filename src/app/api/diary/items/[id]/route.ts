@@ -25,8 +25,8 @@ export async function PUT(
 
   const { id } = await params;
   const db = await getDbUnified();
-  const raw = db.raw as any;
-  const s = db.schema as any;
+  const raw = db.raw;
+  const s = db.schema;
 
   const item = (await db.selectOne(
     raw.select().from(s.mealItems).where(
@@ -132,8 +132,8 @@ export async function DELETE(
 
   const { id } = await params;
   const db = await getDbUnified();
-  const raw = db.raw as any;
-  const s = db.schema as any;
+  const raw = db.raw;
+  const s = db.schema;
 
   const item = (await db.selectOne(
     raw.select().from(s.mealItems).where(

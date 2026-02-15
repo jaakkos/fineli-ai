@@ -17,8 +17,8 @@ export async function DELETE() {
   try {
     const session = await requireSession();
     const db = await getDbUnified();
-    const raw = db.raw as any;
-    const s = db.schema as any;
+    const raw = db.raw;
+    const s = db.schema;
 
     // Delete user — ON DELETE CASCADE removes all child records:
     // auth_tokens, diary_days → meals → meal_items, conversation_messages, conversation_state
@@ -54,8 +54,8 @@ export async function GET() {
   try {
     const session = await requireSession();
     const db = await getDbUnified();
-    const raw = db.raw as any;
-    const s = db.schema as any;
+    const raw = db.raw;
+    const s = db.schema;
 
     const user = await db.selectOne(
       raw.select({

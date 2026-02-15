@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 // Prevent token leakage in Referer headers
 if (typeof document !== 'undefined') {
@@ -23,15 +24,11 @@ function AuthVerifyContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
-  const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading');
-  const [message, setMessage] = useState<string>('');
+  const [status, setStatus] = useState<'loading' | 'ok' | 'error'>(() => token ? 'loading' : 'error');
+  const [message, setMessage] = useState<string>(() => token ? '' : 'Linkki puutteellinen.');
 
   useEffect(() => {
-    if (!token) {
-      setStatus('error');
-      setMessage('Linkki puutteellinen.');
-      return;
-    }
+    if (!token) return;
 
     let cancelled = false;
 
@@ -87,12 +84,12 @@ function AuthVerifyContent() {
       <div className="flex h-dvh items-center justify-center bg-gray-50">
         <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center max-w-sm">
           <p className="text-sm font-medium text-red-800">{message}</p>
-          <a
+          <Link
             href="/"
             className="mt-4 inline-block text-sm text-blue-600 hover:underline"
           >
             Takaisin etusivulle
-          </a>
+          </Link>
         </div>
       </div>
     );

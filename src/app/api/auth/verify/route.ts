@@ -21,8 +21,8 @@ async function cleanupExpiredTokens(db: Awaited<ReturnType<typeof getDbUnified>>
   if (now - lastTokenCleanup < TOKEN_CLEANUP_INTERVAL_MS) return;
   lastTokenCleanup = now;
 
-  const raw = db.raw as any;
-  const s = db.schema as any;
+  const raw = db.raw;
+  const s = db.schema;
   const cutoff = new Date(now - 24 * 60 * 60 * 1000).toISOString(); // 24h ago
 
   try {
@@ -69,8 +69,8 @@ export async function POST(request: NextRequest) {
     }
 
     const db = await getDbUnified();
-    const raw = db.raw as any;
-    const s = db.schema as any;
+    const raw = db.raw;
+    const s = db.schema;
     const now = new Date().toISOString();
 
     const authToken = (await db.selectOne(

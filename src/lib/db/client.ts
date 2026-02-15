@@ -152,8 +152,10 @@ async function runQuery(q: SyncQueryWithRun | Promise<unknown>): Promise<void> {
 }
 
 export type UnifiedDb = {
-  raw: ReturnType<typeof getSqliteDb> | ReturnType<typeof getPgDb>;
-  schema: typeof schema | typeof schemaPg;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- union of SQLite/PG drizzle; callers need dynamic access
+  raw: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- union of SQLite/PG schema modules
+  schema: any;
   selectOne: typeof selectOne;
   selectAll: typeof selectAll;
   run: typeof runQuery;

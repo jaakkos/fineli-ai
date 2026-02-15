@@ -57,7 +57,9 @@ export default function ChatPanel({
         return () => cancelAnimationFrame(rafId);
       } else {
         // User scrolled up — show the scroll-to-bottom button instead
-        setShowScrollBtn(true);
+        // Defer to avoid synchronous setState in effect body
+        const rafId = requestAnimationFrame(() => setShowScrollBtn(true));
+        return () => cancelAnimationFrame(rafId);
       }
     }
   }, [messages.length, isLoading, isNearBottom, scrollToBottom]);

@@ -84,7 +84,7 @@ export function useUpdateItem() {
             const items = m.items as Array<Record<string, unknown>> | undefined;
             if (!Array.isArray(items)) return m;
 
-            let mealTotals: Record<string, number> = {};
+            const mealTotals: Record<string, number> = {};
             const updatedItems = items.map((item: Record<string, unknown>) => {
               if (item.id !== itemId) return item;
 
