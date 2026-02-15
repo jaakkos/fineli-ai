@@ -8,6 +8,7 @@ import React, {
   useMemo,
 } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import type { MealType, ChatMessageData, MealItemWithNutrients, MealWithItems } from '@/types';
 
 import { useAuth } from '@/lib/hooks/use-auth';
@@ -267,23 +268,33 @@ function HomeContent() {
     };
 
     return (
-      <div className="flex h-dvh items-center justify-center bg-gray-50">
-        <div className="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="flex h-dvh items-center justify-center bg-gray-50 px-4">
+        <main
+          className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-6 shadow-md sm:p-8"
+          role="main"
+          aria-label="Kirjautuminen"
+        >
           {magicLinkEmailSent ? (
-            <div className="text-center">
-              <h2 className="mb-2 text-lg font-semibold text-gray-900">Tarkista sähköpostisi</h2>
-              <p className="mb-4 text-sm text-gray-600">
+            <div className="text-center" role="status" aria-live="polite">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h2 className="mb-2 text-xl font-semibold text-gray-900">Tarkista sähköpostisi</h2>
+              <p className="mb-5 text-sm leading-relaxed text-gray-600">
                 Kirjautumislinkki lähetettiin osoitteeseen{' '}
-                <span className="font-medium text-gray-900">{magicLinkEmail}</span>.
+                <span className="font-semibold text-gray-900">{magicLinkEmail}</span>.
               </p>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 <button
                   type="button"
                   onClick={() => {
                     sendMagicLink.mutate(magicLinkEmail);
                   }}
                   disabled={sendMagicLink.isPending}
-                  className="text-sm font-medium text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                  className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                  aria-label="Lähetä kirjautumislinkki uudelleen"
                 >
                   {sendMagicLink.isPending ? 'Lähetetään…' : 'Lähetä uudelleen'}
                 </button>
@@ -293,7 +304,7 @@ function HomeContent() {
                     setMagicLinkEmailSent(false);
                     setMagicLinkEmail('');
                   }}
-                  className="text-sm text-gray-500 hover:text-gray-700"
+                  className="text-sm text-gray-500 transition-colors hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
                 >
                   Vaihda sähköpostia
                 </button>
@@ -301,7 +312,7 @@ function HomeContent() {
             </div>
           ) : (
             <>
-              <h2 className="mb-4 text-lg font-semibold text-gray-900">
+              <h2 className="mb-5 text-xl font-bold text-gray-900">
                 Kirjaudu
               </h2>
               <form
@@ -317,10 +328,12 @@ function HomeContent() {
                     });
                   }
                 }}
-                className="space-y-3"
+                className="space-y-4"
+                noValidate
+                aria-label="Kirjaudu sähköpostilla"
               >
                 <div>
-                  <label htmlFor="login-email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="login-email" className="mb-1.5 block text-sm font-medium text-gray-900">
                     Sähköposti
                   </label>
                   <input
@@ -331,32 +344,47 @@ function HomeContent() {
                     required
                     autoComplete="email"
                     autoFocus
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    aria-describedby={sendMagicLink.isError ? 'login-error' : 'login-help'}
+                    aria-invalid={sendMagicLink.isError ? 'true' : undefined}
+                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base text-gray-900 placeholder:text-gray-400 transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   />
+                  <p id="login-help" className="sr-only">
+                    Saat kirjautumislinkin sähköpostiisi
+                  </p>
                 </div>
                 <button
                   type="submit"
                   disabled={sendMagicLink.isPending}
-                  className="w-full rounded-md bg-blue-600 px-3 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  aria-busy={sendMagicLink.isPending}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-base font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-60"
                 >
+                  {sendMagicLink.isPending && (
+                    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  )}
                   {sendMagicLink.isPending ? 'Lähetetään…' : 'Lähetä kirjautumislinkki'}
                 </button>
               </form>
               {sendMagicLink.isError && (
-                <p className="mt-2 text-sm text-red-600" role="alert">
+                <p id="login-error" className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
                   {localizeError(sendMagicLink.error?.message)}
                 </p>
               )}
-              <p className="mt-4 text-center text-xs text-gray-500">
+              <p className="mt-5 text-center text-xs text-gray-500">
                 Kirjautumalla hyväksyt{' '}
-                <a href="/tietosuoja" className="text-blue-600 hover:underline">
+                <Link
+                  href="/tietosuoja"
+                  className="font-medium text-blue-600 underline decoration-blue-300 underline-offset-2 transition-colors hover:text-blue-800 hover:decoration-blue-500"
+                >
                   tietosuojaselosteen
-                </a>
+                </Link>
                 .
               </p>
             </>
           )}
-        </div>
+        </main>
       </div>
     );
   }
