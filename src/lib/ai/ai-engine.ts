@@ -2,11 +2,12 @@
  * AI-enhanced conversation engine.
  *
  * Wraps the existing processMessage function, adding:
- * 1. AI parsing (structured extraction via LLM)
- * 2. AI response generation (natural Finnish)
- * 3. AI extras: search hints, portion estimates
+ * 1. AI parsing (structured extraction via LLM — handles Finnish morphology)
+ * 2. AI result ranking (filters irrelevant Fineli matches)
+ * 3. AI response generation (natural Finnish)
  *
- * Falls back to the original regex-based engine when AI is disabled or fails.
+ * Search hints and portion estimates are applied in ai-parser.ts before reaching
+ * this module. Falls back to the original regex-based engine when AI fails.
  */
 
 import type {
@@ -20,7 +21,6 @@ import type { EngineStepResult } from '@/lib/conversation/engine';
 import { processMessage, processWithIntent } from '@/lib/conversation/engine';
 import type {
   AIProvider,
-  AIConfig,
   AIConversationContext,
   AISuggestion,
 } from './types';
@@ -123,8 +123,6 @@ export async function processMessageWithAI(
   // weights, yes/no). We always use processWithIntent to avoid double-parsing.
   //
   let aiParsed = false;
-  let searchHints: Record<string, string> | undefined;
-  let portionEstimates: Record<string, number> | undefined;
   let parsedIntent: import('@/lib/conversation/parser').ClassifiedIntent | null = null;
 
   try {
@@ -139,19 +137,10 @@ export async function processMessageWithAI(
     ]);
 
     aiParsed = parseResult.source === 'ai';
-    searchHints = parseResult.aiExtras?.searchHints;
-    portionEstimates = parseResult.aiExtras?.portionEstimates;
     parsedIntent = parseResult.intent;
-
-    // Apply search hints: replace item text with AI's better Fineli search terms
-    if (parsedIntent.type === 'add_items' && searchHints && parsedIntent.data) {
-      const items = parsedIntent.data as { text: string; amount?: number; unit?: string }[];
-      for (const item of items) {
-        if (searchHints[item.text]) {
-          item.text = searchHints[item.text];
-        }
-      }
-    }
+    // Note: searchHints and portionEstimates are already applied inside
+    // ai-parser.ts (item.text = searchHint, amount = portionEstimateGrams).
+    // No further processing needed here.
   } catch {
     // AI parse failed or timed out — engine will use regex fallback
   }

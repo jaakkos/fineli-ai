@@ -220,13 +220,27 @@ async function handleAddItems(
     searchInputs.map((parsed) => fineliClient.searchFoods(parsed.text.trim(), 'fi'))
   );
 
+  // Rank results: skip expensive AI ranker for items that have gram estimates
+  // (they will auto-resolve with the top heuristic result anyway).
+  // For items without grams, use AI ranker if available. Run all in parallel.
+  const topResultsList = await Promise.all(
+    searchInputs.map((parsed, i) => {
+      const results = searchResults[i];
+      const hasGrams = parsed.amount != null && parsed.amount > 0 &&
+        (parsed.unit === 'g' || parsed.unit == null);
+      // Only invoke costly AI ranker when disambiguation is needed (no grams)
+      if (resultRanker && !hasGrams) {
+        return resultRanker(results, parsed.text);
+      }
+      return Promise.resolve(rankSearchResults(results, parsed.text));
+    })
+  );
+
   for (let i = 0; i < searchInputs.length; i++) {
     const parsed = searchInputs[i];
     const results = searchResults[i];
     const initial = createInitialItem(parsed);
-    const topResults = resultRanker
-      ? await resultRanker(results, parsed.text)
-      : rankSearchResults(results, parsed.text);
+    const topResults = topResultsList[i];
     const resolvedItem = resolveItemState(initial, results, topResults);
 
     newItems.push(resolvedItem);
@@ -268,14 +282,27 @@ async function handleAddItems(
   const count = addedTexts.length;
   let message = '';
 
+  // Correction hint shown when items are auto-resolved so users know they can fix mistakes
+  const correctionHint = 'Väärin? Kerro niin korjaan.';
+
   if (resolvedCount > 0 && pendingCount === 0) {
     // All items resolved immediately (exact match with default portion)
-    message = resolvedCount === 1
-      ? `Lisäsin ${addedTexts[0]}. `
-      : `Lisäsin ${resolvedCount} ruokaa. `;
+    if (resolvedCount === 1) {
+      const ri = resolved[0];
+      message = `✓ ${ri.fineliNameFi} (${ri.portionGrams}g). ${correctionHint} `;
+    } else {
+      // List each resolved item with portion for clear feedback
+      const details = resolved
+        .map((ri) => `${ri.fineliNameFi} ${ri.portionGrams}g`)
+        .join(', ');
+      message = `✓ Lisäsin: ${details}. ${correctionHint} `;
+    }
   } else if (resolvedCount > 0 && pendingCount > 0) {
     // Some resolved, some need disambiguation/portion
-    message = `Lisäsin ${resolvedCount} ruokaa. `;
+    const details = resolved
+      .map((ri) => `${ri.fineliNameFi} ${ri.portionGrams}g`)
+      .join(', ');
+    message = `✓ ${details}. ${correctionHint} `;
   } else {
     // None resolved yet — searching/need disambiguation
     message = count === 1

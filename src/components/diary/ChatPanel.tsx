@@ -10,8 +10,11 @@ interface ChatPanelProps {
   messages: ChatMessageData[];
   onSendMessage: (text: string) => void;
   onOptionSelect: (optionKey: string) => void;
+  onResetChat?: () => void;
   isLoading?: boolean;
   isDisabled?: boolean;
+  isResetting?: boolean;
+  hasMessages?: boolean;
   placeholder?: string;
 }
 
@@ -19,8 +22,11 @@ export default function ChatPanel({
   messages,
   onSendMessage,
   onOptionSelect,
+  onResetChat,
   isLoading = false,
   isDisabled = false,
+  isResetting = false,
+  hasMessages = false,
   placeholder,
 }: ChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -81,6 +87,30 @@ export default function ChatPanel({
           aria-live="polite"
           aria-label="Keskustelu"
         >
+          {/* Reset chat button — shown when there are messages to clear */}
+          {hasMessages && onResetChat && (
+            <div className="flex justify-center pb-1">
+              <button
+                onClick={onResetChat}
+                disabled={isResetting || isLoading}
+                className="flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs text-gray-500
+                  transition-colors hover:border-gray-300 hover:text-gray-700 hover:bg-gray-50
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1
+                  disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Tyhjennä keskusteluhistoria"
+              >
+                {isResetting ? (
+                  <Spinner size="xs" />
+                ) : (
+                  <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
+                  </svg>
+                )}
+                Tyhjennä historia
+              </button>
+            </div>
+          )}
+
           {messages.length === 0 && (
             <div className="flex h-full items-center justify-center">
               <p className="text-sm text-gray-400">

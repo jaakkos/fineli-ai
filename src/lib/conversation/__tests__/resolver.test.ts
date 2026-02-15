@@ -128,7 +128,7 @@ describe('resolveItemState', () => {
     expect(resolved.state).toBe('PORTIONING');
   });
 
-  it('DISAMBIGUATING with 2+ results', () => {
+  it('DISAMBIGUATING with 2+ results and no grams', () => {
     const item = makeItem();
     const foods = [
       makeFood(1, 'Kaurapuuro, vedellä'),
@@ -138,6 +138,22 @@ describe('resolveItemState', () => {
     const resolved = resolveItemState(item, foods, foods);
     expect(resolved.state).toBe('DISAMBIGUATING');
     expect(resolved.fineliCandidates).toHaveLength(3);
+  });
+
+  it('auto-resolves with best match when 2+ results and grams known', () => {
+    const item = makeItem({
+      inferredAmount: { value: 20, unit: 'g' },
+    });
+    const foods = [
+      makeFood(1, 'Juusto, edam'),
+      makeFood(2, 'Juusto, gouda'),
+      makeFood(3, 'Juusto, emmental'),
+    ];
+    const resolved = resolveItemState(item, foods, foods);
+    expect(resolved.state).toBe('RESOLVED');
+    expect(resolved.selectedFood).toBe(foods[0]); // picks best (first) match
+    expect(resolved.portionGrams).toBe(20);
+    expect(resolved.fineliCandidates).toHaveLength(3); // preserves all candidates
   });
 
   it('preserves item ID and rawText', () => {

@@ -36,9 +36,9 @@ export function createInitialItem(parsed: ParsedMealItem): ParsedItem {
 /**
  * Determines item state based on search results and applies it.
  * 0 results → NO_MATCH
- * 1 result + grams known (inferredAmount with unit 'g') → RESOLVED (auto-resolve)
+ * grams known (inferredAmount 'g') + any results → RESOLVED with best match (auto-resolve)
  * 1 result + no grams → PORTIONING
- * 2+ results → DISAMBIGUATING with candidates
+ * 2+ results + no grams → DISAMBIGUATING with candidates
  */
 export function resolveItemState(
   item: ParsedItem,
@@ -54,28 +54,31 @@ export function resolveItemState(
     return updated;
   }
 
-  if (topResults.length === 1) {
-    const single = topResults[0];
-    const hasGrams =
-      item.inferredAmount?.unit === 'g' && item.inferredAmount?.value > 0;
+  const hasGrams =
+    item.inferredAmount?.unit === 'g' && item.inferredAmount?.value > 0;
 
-    if (hasGrams) {
-      // Auto-resolve: single match + grams known
-      updated.selectedFood = single;
-      updated.portionGrams = item.inferredAmount!.value;
-      updated.portionUnitCode = 'G';
-      updated.portionUnitLabel = 'g';
-      updated.state = 'RESOLVED';
-      updated.fineliCandidates = [single];
-    } else {
-      updated.state = 'PORTIONING';
-      updated.selectedFood = single;
-      updated.fineliCandidates = [single];
-    }
+  // When grams are known (e.g. AI provided portionEstimateGrams), auto-resolve
+  // with the best match regardless of how many candidates there are.
+  // This avoids tedious disambiguation for sandwich toppings, spreads, etc.
+  if (hasGrams) {
+    const best = topResults[0];
+    updated.selectedFood = best;
+    updated.portionGrams = item.inferredAmount!.value;
+    updated.portionUnitCode = 'G';
+    updated.portionUnitLabel = 'g';
+    updated.state = 'RESOLVED';
+    updated.fineliCandidates = topResults;
     return updated;
   }
 
-  // 2+ results
+  if (topResults.length === 1) {
+    updated.state = 'PORTIONING';
+    updated.selectedFood = topResults[0];
+    updated.fineliCandidates = [topResults[0]];
+    return updated;
+  }
+
+  // 2+ results, no grams → need user input
   updated.state = 'DISAMBIGUATING';
   updated.fineliCandidates = topResults;
   return updated;

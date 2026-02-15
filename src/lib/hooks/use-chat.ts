@@ -55,6 +55,27 @@ export interface SendMessagePayload {
   mealId?: string | null;
 }
 
+/** Reset chat history for a meal (clears messages and conversation state) */
+export function useResetChat(mealId: string | null) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (): Promise<void> => {
+      if (!mealId) throw new Error('No meal selected');
+      const res = await fetch(`/api/chat/state/${mealId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Failed to reset chat');
+    },
+    onSuccess: () => {
+      if (mealId) {
+        void queryClient.invalidateQueries({
+          queryKey: ['chat', 'state', mealId],
+        });
+      }
+    },
+  });
+}
+
 /** Send a chat message */
 export function useSendMessage(mealId: string | null) {
   const queryClient = useQueryClient();

@@ -69,7 +69,55 @@ SÄÄNNÖT:
    - Anna searchHint AINA kun tiedät paremman Fineli-hakutermin (esim. "maidolla" → searchHint: "maito", "kaurapuuroa" → searchHint: "kaurapuuro")
    - Arvioi annoskoko grammoina jos käyttäjä käyttää arkikieltä ("kuppi", "lautasellinen", "normaali annos")
 
-3. Tyypilliset suomalaiset annoskoot:
+3. YHDISTELMÄRUOAT — pura AINA osiin:
+   VOILEIPÄ / LEIPÄ:
+   - "voileipä" / "leipä" = aina leipäviipale + voi + mainitut täytteet
+   - "söin voileivän kinkulla ja juustolla" = 4 itemiä:
+     leipä (searchHint: "ruisleipä", portionEstimateGrams: 35)
+     voi (searchHint: "voi", portionEstimateGrams: 5)
+     kinkku (searchHint: "kinkku, keittokinkku", portionEstimateGrams: 15)
+     juusto (searchHint: "juusto, edam", portionEstimateGrams: 20)
+   - "paahtoleipää juustolla" = 3 itemiä: paahtoleipä 25g, voi 5g, juusto 20g
+   - "sämpylä" = 1 sämpylä ~60g + voi 5g + mainitut täytteet
+   - Lukumäärä: "kaksi voileipää kinkulla" = leipä 70g (2x35), voi 10g (2x5), kinkku 30g (2x15)
+
+   PUURO:
+   - "kaurapuuroa" = kaurapuuro + oletettu maito (lisää maito vain jos mainitaan)
+   - "puuroa hillolla ja voilla" = kaurapuuro 300g, hillo 15g, voi 5g
+
+   SALAATTI:
+   - "salaattia kanalla" = salaatti (sekasalaatti ~150g) + kana (~100g) + lisäkkeet erikseen
+   - "kreikkalainen salaatti" = salaatti ~200g, fetajuusto ~30g, oliivit ~20g
+
+   PASTA-/RIISIRUOKA:
+   - "pasta bolognese" = pasta 200g, jauhelihakastike 150g
+   - "kanariisi" = riisi 200g, kana 100g
+
+   YHDYSSANAT (compound words) — pura osiin:
+   Esimerkkejä:
+   - "kinkkujuustoleipä" = leipä + kinkku + juusto (3 itemiä, oletusannokset)
+   - "kinkkuvoileipä" = leipä + voi + kinkku
+   - "juustosämpylä" = sämpylä + juusto
+   - "lohivoileipä" = leipä + voi + lohi
+   - "kanariisi" = riisi + kana
+   - "kalkkunajuustosämpylä" = sämpylä + kalkkuna + juusto
+   - "savulohileipä" = leipä + voi + savulohi
+   - "munavoileipä" = leipä + voi + kananmuna
+
+   ÄLÄ PURA näitä (vakiintuneita yksittäistuotteita):
+   - "jauhelihakastike", "kaurapuuro", "voileipäkeksi", "suklaakakku"
+   - "maitosuklaalevy", "juustokumina", "tomaattiketsuppi"
+
+   YLEISSÄÄNTÖ: Jos yhdyssana yhdistää TUNNISTETTAVIA erillisiä ruoka-aineita
+   (esim. [ruoka1][ruoka2][leipä/sämpylä/salaatti/riisi]), pura osiin ja anna
+   jokaiselle oletusannos. Älä pura jos sana on vakiintunut nimike yhdelle
+   tuotteelle tai valmisteelle. Käytä esimerkkejä yllä ohjenuorana, mutta sovella
+   samaa logiikkaa KAIKKIIN yhdyssanoihin — myös sellaisiin joita ei ole listattu.
+
+   TÄRKEÄ: Kun käyttäjä sanoo yhdistelmäruuan ILMAN tarkkoja täytteitä, kysy mitä täytteitä.
+   Mutta kun täytteet on kerrottu, pura ne suoraan ja anna kaikille oletusannokset.
+
+4. Tyypilliset suomalaiset annoskoot:
    - Kaurapuuro: pieni 200g, normaali 300g, iso 450g
    - Kahvi: kuppi 150-200ml
    - Maito: lasi 200ml, dl-mitta tarkka
@@ -91,16 +139,27 @@ SÄÄNNÖT:
    - "kaksi siivua juustoa" → amount=2, unit=viipale, portionEstimateGrams=35
    - "leike siivu" → amount=1, unit=viipale, portionEstimateGrams=15
    - "pari palaa leipää" → amount=2, unit=viipale, portionEstimateGrams=70
-   - Anna portionEstimateGrams AINA kun käyttäjä ei anna tarkkaa grammamäärää
 
-4. Vastaukset odottaviin kysymyksiin:
+5. OLETUSANNOKSET — anna portionEstimateGrams AINA:
+   - Anna portionEstimateGrams JOKAISELLE ruoalle, MYÖS kun käyttäjä ei kerro tarkkaa määrää
+   - Käytä yllä olevia tyypillisiä annoskokoja oletusarvoina
+   - Esim. "söin leipää juustolla" → leipä portionEstimateGrams=35, juusto portionEstimateGrams=20
+   - Tämä on kriittistä: ilman arviota järjestelmä joutuu kysymään jokaisesta erikseen!
+   - Anna searchHint JOKAISELLE ruoalle: valitse yleisin Fineli-vaihtoehto
+     * juusto → "juusto, edam" (yleisin)
+     * kinkku → "kinkku, keittokinkku"
+     * maito → "maito, kevyt"
+     * leipä → "ruisleipä" (yleisin suomalainen leipä)
+     * voi → "voi"
+
+6. Vastaukset odottaviin kysymyksiin:
    - Numerovastaus (1, 2, 3) = valinta listasta (1-pohjainen)
    - Gramma-vastaus (120g, 200 grammaa) = annoskoko
    - Tilavuus (2 dl, 100 ml) = tilavuusannos
    - Koko (pieni, normaali, iso) = Fineli-yksikkökoko
    - Kyllä/ei (joo, kyllä, ei, en) = kyllä/ei-vastaus
 
-5. Confidence:
+7. Confidence:
    - 0.9+ = erittäin varma
    - 0.7-0.9 = melko varma
    - 0.5-0.7 = arvaus
@@ -179,12 +238,12 @@ export const PARSE_TOOL_ANTHROPIC = {
             searchHint: {
               type: 'string',
               description:
-                'Parempi Fineli-hakutermi jos tiedät (esim. "kevytmaito" → "maito, kevyt")',
+                'Fineli-hakutermi — anna AINA, valitse yleisin vaihtoehto (esim. "juusto" → "juusto, edam", "kinkku" → "kinkku, keittokinkku", "leipä" → "ruisleipä")',
             },
             portionEstimateGrams: {
               type: 'number',
               description:
-                'Arvio grammoina jos käyttäjä ei antanut tarkkaa määrää',
+                'Arvio grammoina — anna AINA kun käyttäjä ei anna tarkkaa grammamäärää. Käytä tyypillisiä annoskokoja (leipä 35g, juusto 20g, kinkku 15g, voi 5g jne.)',
             },
           },
           required: ['text'],

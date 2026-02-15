@@ -19,7 +19,7 @@ import { useDiaryDay } from '@/lib/hooks/use-diary';
 import { useCreateMeal } from '@/lib/hooks/use-diary';
 import { useDeleteItem } from '@/lib/hooks/use-diary';
 import { useUpdateItem } from '@/lib/hooks/use-diary';
-import { useChatState } from '@/lib/hooks/use-chat';
+import { useChatState, useResetChat } from '@/lib/hooks/use-chat';
 import { useSendMessage } from '@/lib/hooks/use-chat';
 import { mapApiMessages } from '@/lib/utils/map-api-messages';
 import { newId } from '@/types';
@@ -95,6 +95,7 @@ function HomeContent() {
   const currentMealId = currentMeal?.id ?? null;
   const { data: chatState, isLoading: chatLoading } = useChatState(currentMealId);
   const sendMessage = useSendMessage(currentMealId);
+  const resetChat = useResetChat(currentMealId);
 
   const currentItems: MealItemWithNutrients[] = currentMeal?.items ?? [];
   const currentTotals = currentMeal?.totals ?? {};
@@ -212,6 +213,11 @@ function HomeContent() {
     },
     [currentMealId, sendMessage],
   );
+
+  const handleResetChat = useCallback(() => {
+    if (!currentMealId) return;
+    resetChat.mutate();
+  }, [currentMealId, resetChat]);
 
   const handleDeleteItem = useCallback(
     (itemId: string) => {
@@ -592,8 +598,11 @@ function HomeContent() {
                 messages={currentMessages}
                 onSendMessage={handleSendMessage}
                 onOptionSelect={handleOptionSelect}
+                onResetChat={currentMealId ? handleResetChat : undefined}
                 isLoading={chatLoading || sendMessage.isPending}
                 isDisabled={false}
+                isResetting={resetChat.isPending}
+                hasMessages={(chatState?.messages?.length ?? 0) > 0}
                 placeholder={
                   !currentMealId && meals.every((m: MealWithItems) => m.mealType !== selectedMeal)
                     ? 'Aloita kirjoittamalla mitä söit...'

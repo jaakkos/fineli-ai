@@ -9,7 +9,7 @@ import { getDbUnified } from '@/lib/db/client';
 import { getSession } from '@/lib/auth/session';
 import { chatMessageSchema, conversationStateSchema } from '@/lib/utils/validation';
 import { handleRouteError } from '@/lib/utils/api-error';
-import { processMessage } from '@/lib/conversation/engine';
+import { processMessageWithAI } from '@/lib/ai/ai-engine';
 import { getAIProvider } from '@/lib/ai';
 import { fineliClient, portionConverter } from '@/lib/fineli/singleton';
 import { newId } from '@/types';
@@ -105,12 +105,16 @@ export async function POST(request: NextRequest) {
     };
   }
 
-  // --- Process through engine (non-AI, for state transitions) ---
-  const result = await processMessage(
+  // --- Process through AI-enhanced engine (same as /api/chat/message) ---
+  const aiProvider = getAIProvider();
+  const mealType = (meal.mealType ?? 'other') as MealType;
+  const result = await processMessageWithAI(
     message,
     currentState,
     fineliClient,
-    portionConverter
+    portionConverter,
+    aiProvider,
+    mealType
   );
 
   const now = new Date().toISOString();
@@ -208,10 +212,7 @@ export async function POST(request: NextRequest) {
   }
 
   // --- Stream AI response ---
-  const aiProvider = getAIProvider();
-
   if (aiProvider?.streamResponse) {
-    const mealType = (meal.mealType ?? 'other') as MealType;
 
     // Build context for AI
     const hour = new Date().getHours();
@@ -294,12 +295,13 @@ export async function POST(request: NextRequest) {
   }
 
   // No streaming available — save assistant message and return JSON
+  const displayedMessage = result.aiMessage ?? result.assistantMessage;
   await db.run(
     raw.insert(s.conversationMessages).values({
       id: newId(),
       mealId,
       role: 'assistant',
-      content: result.assistantMessage,
+      content: displayedMessage,
       metadata: result.questionMetadata
         ? { questionMetadata: result.questionMetadata }
         : null,
@@ -309,7 +311,7 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     data: {
-      assistantMessage: result.assistantMessage,
+      assistantMessage: displayedMessage,
       questionMetadata: result.questionMetadata,
     },
   });

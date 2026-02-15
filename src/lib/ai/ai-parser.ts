@@ -71,6 +71,14 @@ function isStructuredInput(message: string, pendingQuestion: PendingQuestion | n
 // AI → ClassifiedIntent mapping
 // ---------------------------------------------------------------------------
 
+// Portion estimate bounds — reject clearly unreasonable AI estimates
+const MIN_PORTION_GRAMS = 1;
+const MAX_PORTION_GRAMS = 2000;
+
+function isReasonablePortionEstimate(grams: number): boolean {
+  return grams >= MIN_PORTION_GRAMS && grams <= MAX_PORTION_GRAMS;
+}
+
 /**
  * Convert AI parse result to the ClassifiedIntent type used by the engine.
  */
@@ -85,11 +93,13 @@ function aiResultToClassifiedIntent(
           // When the AI provides a gram estimate for descriptive quantities
           // (e.g. "kaksi siivua juustoa" → portionEstimateGrams: 30),
           // use it directly so the engine can auto-resolve without asking
-          // the user for a portion. Only apply when the unit isn't already 'g'.
+          // the user for a portion. Only apply when the unit isn't already 'g'
+          // and the estimate is within reasonable bounds.
           if (
             item.portionEstimateGrams != null &&
             item.portionEstimateGrams > 0 &&
-            item.unit !== 'g'
+            item.unit !== 'g' &&
+            isReasonablePortionEstimate(item.portionEstimateGrams)
           ) {
             return {
               text: item.searchHint ?? item.text,

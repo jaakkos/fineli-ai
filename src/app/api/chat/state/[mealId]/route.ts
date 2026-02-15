@@ -73,3 +73,67 @@ export async function GET(
     return handleRouteError(error);
   }
 }
+
+/**
+ * DELETE /api/chat/state/:mealId
+ * Clears all chat messages and resets conversation state for the meal.
+ * Meal items (food entries) are NOT affected — only the chat history is cleared.
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ mealId: string }> }
+) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Not authenticated' } },
+        { status: 401 }
+      );
+    }
+
+    const { mealId } = await params;
+    const db = await getDbUnified();
+    const raw = db.raw;
+    const s = db.schema;
+
+    // Verify meal exists and belongs to user
+    const meal = (await db.selectOne(
+      raw.select().from(s.meals).where(
+        and(eq(s.meals.id, mealId), isNull(s.meals.deletedAt))
+      )
+    )) as { id: string; diaryDayId: string } | undefined;
+
+    if (!meal) {
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Meal not found' } },
+        { status: 404 }
+      );
+    }
+
+    const day = (await db.selectOne(
+      raw.select().from(s.diaryDays).where(eq(s.diaryDays.id, meal.diaryDayId))
+    )) as { id: string; userId: string } | undefined;
+
+    if (!day || day.userId !== session.userId) {
+      return NextResponse.json(
+        { error: { code: 'FORBIDDEN', message: 'Access denied' } },
+        { status: 403 }
+      );
+    }
+
+    // Delete all messages for this meal
+    await db.run(
+      raw.delete(s.conversationMessages).where(eq(s.conversationMessages.mealId, mealId))
+    );
+
+    // Delete conversation state for this meal
+    await db.run(
+      raw.delete(s.conversationState).where(eq(s.conversationState.mealId, mealId))
+    );
+
+    return NextResponse.json({ data: { success: true } });
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}
