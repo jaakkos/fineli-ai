@@ -115,8 +115,8 @@ export class E2EClient {
   // Auth
   // -------------------------------------------------------------------------
 
-  async createAnonymousSession(): Promise<{ userId: string; anonymousId: string }> {
-    const res = await this.post<{ userId: string; anonymousId: string }>(
+  async createAnonymousSession(): Promise<{ userId: string; anonymousId: string; isAnonymous: boolean }> {
+    const res = await this.post<{ userId: string; anonymousId: string; isAnonymous: boolean }>(
       '/api/auth/anonymous'
     );
     if (!res.ok || !res.data) {

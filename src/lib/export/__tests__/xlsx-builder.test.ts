@@ -7,7 +7,7 @@ import type { ExportInput } from '@/types';
 // Helper: read workbook from buffer
 async function readWorkbook(buffer: Buffer): Promise<ExcelJS.Workbook> {
   const wb = new ExcelJS.Workbook();
-  await wb.xlsx.load(buffer);
+  await wb.xlsx.load(buffer as unknown as ExcelJS.Buffer);
   return wb;
 }
 
@@ -100,8 +100,8 @@ describe('generateExport', () => {
     const sheet = wb.worksheets[0];
     expect(sheet.views).toHaveLength(1);
     expect(sheet.views[0].state).toBe('frozen');
-    expect(sheet.views[0].xSplit).toBe(3);
-    expect(sheet.views[0].ySplit).toBe(1);
+    expect((sheet.views[0] as any).xSplit).toBe(3);
+    expect((sheet.views[0] as any).ySplit).toBe(1);
   });
 
   it('formats date as dd.mm.yyyy', async () => {

@@ -15,7 +15,7 @@ describe('session — production SESSION_SECRET', () => {
   beforeEach(async () => {
     vi.resetModules();
     const { cookies } = await import('next/headers');
-    vi.mocked(cookies).mockResolvedValue({ get: () => undefined });
+    vi.mocked(cookies).mockResolvedValue({ get: () => undefined } as any);
   });
 
   afterEach(() => {
@@ -23,13 +23,13 @@ describe('session — production SESSION_SECRET', () => {
   });
 
   it('throws when NODE_ENV is production and SESSION_SECRET is missing', async () => {
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV = 'production';
     delete process.env.SESSION_SECRET;
 
     const { cookies } = await import('next/headers');
     vi.mocked(cookies).mockResolvedValue({
-      get: () => ({ value: 'dummy-token-so-secret-is-called' }),
-    });
+      get: () => ({ name: 'fineli_session', value: 'dummy-token-so-secret-is-called' }),
+    } as any);
 
     const { getSession } = await import('../session');
 
@@ -39,7 +39,7 @@ describe('session — production SESSION_SECRET', () => {
   });
 
   it('returns null when no cookie and SESSION_SECRET is set in production', async () => {
-    process.env.NODE_ENV = 'production';
+    (process.env as any).NODE_ENV = 'production';
     process.env.SESSION_SECRET = 'test-secret-at-least-32-chars-long';
 
     const { getSession } = await import('../session');
