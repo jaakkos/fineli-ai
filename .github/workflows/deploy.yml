@@ -1,10 +1,13 @@
-name: CI & Deploy to Render
+name: CI
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
+# Render auto-deploys from main via Git integration.
+# This workflow runs checks before Render builds.
 
 env:
   NODE_VERSION: "22"
@@ -74,15 +77,3 @@ jobs:
 
       - name: Run tests
         run: pnpm test:run
-
-  deploy:
-    name: Deploy to Render
-    needs: [check, test]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - name: Trigger Render deploy
-        run: |
-          curl -s -o /dev/null -w "%{http_code}" \
-            "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
-            | grep -q "200" && echo "Deploy triggered" || echo "Deploy failed"
