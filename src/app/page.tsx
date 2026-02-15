@@ -10,8 +10,11 @@ import React, {
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import type { MealType, ChatMessageData, MealItemWithNutrients, MealWithItems } from '@/types';
+import { MEAL_TYPES, MEAL_TYPE_LABELS } from '@/types';
 
 import { useAuth } from '@/lib/hooks/use-auth';
+import { useKeyboardShortcuts } from '@/lib/hooks/use-keyboard-shortcuts';
+import type { KeyboardShortcut } from '@/lib/hooks/use-keyboard-shortcuts';
 import { useDiaryDay } from '@/lib/hooks/use-diary';
 import { useCreateMeal } from '@/lib/hooks/use-diary';
 import { useDeleteItem } from '@/lib/hooks/use-diary';
@@ -31,6 +34,8 @@ import ExportButton from '@/components/diary/ExportButton';
 import Spinner from '@/components/ui/Spinner';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
 import UserMenu from '@/components/ui/UserMenu';
+import KeyboardShortcutsHelp from '@/components/ui/KeyboardShortcutsHelp';
+import type { ShortcutGroup } from '@/components/ui/KeyboardShortcutsHelp';
 
 function todayStr(): string {
   const d = new Date();
@@ -69,6 +74,7 @@ function HomeContent() {
   const [magicLinkEmailSent, setMagicLinkEmailSent] = useState(false);
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
   const [exportError, setExportError] = useState<string | null>(null);
+  const [shortcutsHelpOpen, setShortcutsHelpOpen] = useState(false);
   const { account, createAnonymousSession, sendMagicLink, logout, deleteAccount } = useAuth();
   const { data: dayData, isLoading: diaryLoading, error: diaryError } = useDiaryDay(date);
   const createMeal = useCreateMeal(date);
@@ -242,6 +248,78 @@ function HomeContent() {
       setIsExporting(false);
     }
   }, []);
+
+  // ── Keyboard shortcuts ──
+  const prevDay = useCallback(() => {
+    const d = new Date(date);
+    d.setDate(d.getDate() - 1);
+    handleDateChange(
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    );
+  }, [date, handleDateChange]);
+
+  const nextDay = useCallback(() => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + 1);
+    handleDateChange(
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    );
+  }, [date, handleDateChange]);
+
+  const goToday = useCallback(() => {
+    handleDateChange(todayStr());
+  }, [handleDateChange]);
+
+  const focusChatInput = useCallback(() => {
+    const textarea = document.querySelector<HTMLTextAreaElement>('textarea[aria-label="Kirjoita viesti"]');
+    textarea?.focus();
+  }, []);
+
+  const shortcuts: KeyboardShortcut[] = useMemo(() => [
+    { key: 'ArrowLeft', handler: prevDay, description: 'Edellinen päivä', group: 'Navigointi' },
+    { key: '[', handler: prevDay, description: 'Edellinen päivä', group: 'Navigointi' },
+    { key: 'ArrowRight', handler: nextDay, description: 'Seuraava päivä', group: 'Navigointi' },
+    { key: ']', handler: nextDay, description: 'Seuraava päivä', group: 'Navigointi' },
+    { key: 't', handler: goToday, description: 'Tänään', group: 'Navigointi' },
+    ...MEAL_TYPES.map((type, i) => ({
+      key: String(i + 1),
+      handler: () => handleMealChange(type),
+      description: MEAL_TYPE_LABELS[type],
+      group: 'Ateriat',
+    })),
+    { key: '/', handler: focusChatInput, description: 'Kirjoita ruokia', group: 'Toiminnot' },
+    { key: 'i', handler: focusChatInput, description: 'Kirjoita ruokia', group: 'Toiminnot' },
+    { key: '?', handler: () => setShortcutsHelpOpen(true), description: 'Pikanäppäimet', group: 'Toiminnot' },
+    { key: 'Escape', handler: () => setShortcutsHelpOpen(false), description: 'Sulje', group: 'Toiminnot', allowInInput: true },
+  ], [prevDay, nextDay, goToday, focusChatInput, handleMealChange]);
+
+  useKeyboardShortcuts(shortcuts);
+
+  const shortcutGroups: ShortcutGroup[] = useMemo(() => [
+    {
+      title: 'Navigointi',
+      shortcuts: [
+        { keys: ['←', '['], description: 'Edellinen päivä' },
+        { keys: ['→', ']'], description: 'Seuraava päivä' },
+        { keys: ['T'], description: 'Tänään' },
+      ],
+    },
+    {
+      title: 'Ateriat',
+      shortcuts: MEAL_TYPES.map((type, i) => ({
+        keys: [String(i + 1)],
+        description: MEAL_TYPE_LABELS[type],
+      })),
+    },
+    {
+      title: 'Toiminnot',
+      shortcuts: [
+        { keys: ['/', 'I'], description: 'Kirjoita ruokia' },
+        { keys: ['?'], description: 'Näytä pikanäppäimet' },
+        { keys: ['Esc'], description: 'Sulje dialogi' },
+      ],
+    },
+  ], []);
 
   // Only show login for auth errors (401/403), not transient API failures
   const isAuthError = requireMagicLink && diaryError != null;
@@ -547,6 +625,13 @@ function HomeContent() {
           </div>
         </section>
       </main>
+
+      {/* Keyboard shortcuts help dialog */}
+      <KeyboardShortcutsHelp
+        open={shortcutsHelpOpen}
+        onClose={() => setShortcutsHelpOpen(false)}
+        groups={shortcutGroups}
+      />
     </div>
   );
 }
