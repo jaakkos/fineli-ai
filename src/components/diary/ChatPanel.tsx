@@ -98,10 +98,10 @@ export default function ChatPanel({
           ))}
 
           {isLoading && (
-            <div className="flex justify-start">
+            <div className="flex justify-start" role="status" aria-label="Avustaja kirjoittaa vastausta">
               <div className="flex items-center gap-2 rounded-2xl rounded-bl-md bg-gray-100 px-3 py-2">
                 <Spinner size="sm" />
-                <span className="text-sm text-gray-500">Kirjoittaa...</span>
+                <span className="text-sm text-gray-500" aria-hidden="true">Kirjoittaa...</span>
               </div>
             </div>
           )}
@@ -120,7 +120,7 @@ export default function ChatPanel({
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-label="Vieritä alas"
           >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
               <path d="M6 9l6 6 6-6" />
             </svg>
           </button>

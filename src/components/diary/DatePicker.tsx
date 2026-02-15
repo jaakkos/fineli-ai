@@ -33,12 +33,17 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
         className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         aria-label="Edellinen päivä"
       >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
           <path d="M15 19l-7-7 7-7" />
         </svg>
       </button>
 
-      <span className="min-w-[7rem] text-center text-sm font-medium text-gray-900">
+      <span
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="min-w-[7rem] text-center text-sm font-medium text-gray-900"
+      >
         {displayDate}
       </span>
 
@@ -47,7 +52,7 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
         className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         aria-label="Seuraava päivä"
       >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
           <path d="M9 5l7 7-7 7" />
         </svg>
       </button>
@@ -56,6 +61,7 @@ export default function DatePicker({ value, onChange }: DatePickerProps) {
         <button
           onClick={() => onChange(toStr(new Date()))}
           className="ml-1 rounded-lg px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          aria-label="Siirry tähän päivään"
         >
           Tänään
         </button>

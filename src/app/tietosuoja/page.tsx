@@ -8,10 +8,12 @@ export const metadata: Metadata = {
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-dvh bg-gray-50">
-      <div className="mx-auto max-w-2xl px-4 py-10">
-        <Link href="/" className="mb-6 inline-block text-sm text-blue-600 hover:underline">
-          &larr; Takaisin
-        </Link>
+      <main className="mx-auto max-w-2xl px-4 py-10">
+        <nav aria-label="Navigointi">
+          <Link href="/" className="mb-6 inline-block text-sm text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:rounded">
+            &larr; Takaisin
+          </Link>
+        </nav>
 
         <h1 className="mb-6 text-2xl font-bold text-gray-900">Tietosuojaseloste</h1>
         <p className="mb-4 text-sm text-gray-500">Päivitetty 15.2.2026</p>
@@ -124,7 +126,7 @@ export default function PrivacyPolicyPage() {
             </p>
           </section>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

@@ -35,21 +35,28 @@ export default function ExportButton({
         size="sm"
         loading={isExporting}
         onClick={() => setShowRange(!showRange)}
+        aria-label="Vie Excel-tiedostona"
+        aria-expanded={showRange}
       >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
         </svg>
         {isExporting ? 'Luodaan...' : 'Vie Excel'}
       </Button>
 
       {showRange && !isExporting && (
-        <div className="absolute right-0 top-full z-10 mt-2 w-64 rounded-lg border border-gray-200 bg-white p-4 shadow-lg">
+        <div
+          className="absolute right-0 top-full z-10 mt-2 w-64 rounded-lg border border-gray-200 bg-white p-4 shadow-lg"
+          role="dialog"
+          aria-label="Vienti-asetukset"
+        >
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label htmlFor="export-from" className="block text-xs font-medium text-gray-600 mb-1">
                 Alkaen
               </label>
               <input
+                id="export-from"
                 type="date"
                 value={fromDate}
                 onChange={(e) => setFromDate(e.target.value)}
@@ -57,10 +64,11 @@ export default function ExportButton({
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label htmlFor="export-to" className="block text-xs font-medium text-gray-600 mb-1">
                 Asti
               </label>
               <input
+                id="export-to"
                 type="date"
                 value={toDate}
                 onChange={(e) => setToDate(e.target.value)}

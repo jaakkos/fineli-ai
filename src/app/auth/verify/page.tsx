@@ -73,25 +73,25 @@ function AuthVerifyContent() {
 
   if (status === 'loading') {
     return (
-      <div className="flex h-dvh items-center justify-center bg-gray-50">
-        <p className="text-gray-600">Kirjaudutaan…</p>
-      </div>
+      <main className="flex h-dvh items-center justify-center bg-gray-50" aria-busy="true">
+        <p className="text-gray-600" role="status">Kirjaudutaan…</p>
+      </main>
     );
   }
 
   if (status === 'error') {
     return (
-      <div className="flex h-dvh items-center justify-center bg-gray-50">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center max-w-sm">
+      <main className="flex h-dvh items-center justify-center bg-gray-50">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center max-w-sm" role="alert">
           <p className="text-sm font-medium text-red-800">{message}</p>
           <Link
             href="/"
-            className="mt-4 inline-block text-sm text-blue-600 hover:underline"
+            className="mt-4 inline-block text-sm text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             Takaisin etusivulle
           </Link>
         </div>
-      </div>
+      </main>
     );
   }
 

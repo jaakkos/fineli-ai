@@ -44,7 +44,7 @@ export default function ChatInput({
   const hasContent = value.trim().length > 0;
 
   return (
-    <div className="shrink-0 flex items-end gap-2 border-t border-gray-200 bg-white px-3 py-2">
+    <div className="shrink-0 flex items-end gap-2 border-t border-gray-200 bg-white px-3 py-2" role="form" aria-label="Lähetä viesti">
       <textarea
         ref={textareaRef}
         value={value}
@@ -59,7 +59,11 @@ export default function ChatInput({
           focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500
           disabled:opacity-50"
         aria-label="Kirjoita viesti"
+        aria-describedby="chat-input-hint"
       />
+      <span id="chat-input-hint" className="sr-only">
+        Paina Enter lähettääksesi, Shift+Enter rivinvaihto
+      </span>
       <button
         onClick={handleSend}
         disabled={disabled || !hasContent}
@@ -73,7 +77,7 @@ export default function ChatInput({
           }`}
         aria-label="Lähetä viesti"
       >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
           <path d="M5 12h14M12 5l7 7-7 7" />
         </svg>
       </button>

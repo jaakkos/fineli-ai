@@ -489,6 +489,14 @@ function HomeContent() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-gray-50">
+      {/* Skip navigation link for keyboard/screen reader users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white focus:shadow-lg"
+      >
+        Siirry sisältöön
+      </a>
+
       {/* ── Sticky header ── */}
       <header className="z-20 flex-shrink-0 border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
@@ -529,20 +537,22 @@ function HomeContent() {
       <CompactNutrientBar nutrients={currentTotals} />
 
       {/* ── Main content: fills remaining viewport height ── */}
-      <main className="flex min-h-0 flex-1 flex-col lg:flex-row lg:mx-auto lg:w-full lg:max-w-7xl">
+      <main id="main-content" className="flex min-h-0 flex-1 flex-col lg:flex-row lg:mx-auto lg:w-full lg:max-w-7xl">
 
         {/* ─── LEFT: Chat panel ─── */}
-        <section className="flex min-h-0 flex-1 flex-col lg:w-1/2 lg:border-r lg:border-gray-200">
+        <section aria-label="Keskustelu" className="flex min-h-0 flex-1 flex-col lg:w-1/2 lg:border-r lg:border-gray-200">
           {/* Mobile: collapsible food items above chat */}
           <div className="flex-shrink-0 lg:hidden">
             {currentItems.length > 0 && (
               <div className="border-b border-gray-200 bg-white">
                 <button
                   onClick={() => setFoodsOpen(!foodsOpen)}
-                  className="flex w-full items-center justify-between px-4 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="flex w-full items-center justify-between px-4 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
                   aria-expanded={foodsOpen}
+                  aria-controls="mobile-food-list"
+                  aria-label={`Ruoat (${currentItems.length} tuotetta)`}
                 >
-                  <span>
+                  <span aria-hidden="true">
                     Ruoat ({currentItems.length})
                   </span>
                   <svg
@@ -551,12 +561,13 @@ function HomeContent() {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
+                    aria-hidden="true"
                   >
                     <path d="M6 9l6 6 6-6" />
                   </svg>
                 </button>
                 {foodsOpen && (
-                  <div className="max-h-48 overflow-y-auto scrollbar-thin px-3 pb-3">
+                  <div id="mobile-food-list" className="max-h-48 overflow-y-auto scrollbar-thin px-3 pb-3">
                     <MealItemsList
                       items={currentItems}
                       onDeleteItem={handleDeleteItem}
@@ -594,7 +605,7 @@ function HomeContent() {
         </section>
 
         {/* ─── RIGHT: Foods + nutrients (desktop only) ─── */}
-        <section className="hidden min-h-0 overflow-y-auto scrollbar-thin lg:flex lg:w-1/2 lg:flex-col lg:gap-4 lg:p-4">
+        <section aria-label="Ruoat ja ravintoarvot" className="hidden min-h-0 overflow-y-auto scrollbar-thin lg:flex lg:w-1/2 lg:flex-col lg:gap-4 lg:p-4">
           <div>
             <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-gray-500">
               Ruoat

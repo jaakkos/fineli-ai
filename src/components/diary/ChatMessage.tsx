@@ -19,14 +19,18 @@ export default function ChatMessage({
 
   if (isSystem) {
     return (
-      <div className="flex justify-center py-1">
+      <div className="flex justify-center py-1" role="status">
         <span className="text-xs text-gray-400">{message.content}</span>
       </div>
     );
   }
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
+      role="article"
+      aria-label={isUser ? 'Sinun viestisi' : 'Avustajan viesti'}
+    >
       <div className="max-w-[85%] space-y-1.5">
         <div
           className={`
@@ -43,7 +47,7 @@ export default function ChatMessage({
         </div>
 
         {message.state === 'error' && (
-          <p className="text-xs text-red-500">
+          <p className="text-xs text-red-500" role="alert">
             Viestin lähetys epäonnistui. Yritä uudelleen.
           </p>
         )}

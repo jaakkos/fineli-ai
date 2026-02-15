@@ -74,24 +74,29 @@ export default function NutrientSummary({ nutrients }: NutrientSummaryProps) {
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white">
+    <div
+      role="region"
+      aria-label="Ravintoarvot"
+      className="rounded-lg border border-gray-200 bg-white"
+    >
       {/* Primary nutrients - always visible */}
-      <div className="divide-y divide-gray-100">
+      <dl className="divide-y divide-gray-100">
         {primaryNutrients.map((n) => (
           <div key={n.code} className="flex items-center justify-between px-4 py-2">
-            <span className="text-sm text-gray-600">{n.label}</span>
-            <span className="text-sm font-medium text-gray-900">
+            <dt className="text-sm text-gray-600">{n.label}</dt>
+            <dd className="m-0 text-sm font-medium text-gray-900">
               {formatValue(nutrients[n.code], n.decimals ?? 1)} {n.unit}
-            </span>
+            </dd>
           </div>
         ))}
-      </div>
+      </dl>
 
       {/* Expand/collapse */}
       <button
         onClick={() => setExpanded(!expanded)}
         className="flex w-full items-center justify-center gap-1 border-t border-gray-200 px-4 py-2 text-xs text-gray-500 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
         aria-expanded={expanded}
+        aria-controls="nutrient-details"
       >
         {expanded ? 'Piilota lisätiedot' : 'Näytä lisää ravintoaineita'}
         <svg
@@ -100,6 +105,7 @@ export default function NutrientSummary({ nutrients }: NutrientSummaryProps) {
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
+          aria-hidden="true"
         >
           <path d="M6 9l6 6 6-6" />
         </svg>
@@ -107,7 +113,7 @@ export default function NutrientSummary({ nutrients }: NutrientSummaryProps) {
 
       {/* Expanded details */}
       {expanded && (
-        <div className="border-t border-gray-200">
+        <div id="nutrient-details" className="border-t border-gray-200">
           {expandedGroups.map((group) => (
             <div key={group.title}>
               <div className="bg-gray-50 px-4 py-1.5">
@@ -115,19 +121,19 @@ export default function NutrientSummary({ nutrients }: NutrientSummaryProps) {
                   {group.title}
                 </span>
               </div>
-              <div className="divide-y divide-gray-100">
+              <dl className="divide-y divide-gray-100">
                 {group.nutrients.map((n) => (
                   <div
                     key={n.code}
                     className="flex items-center justify-between px-4 py-1.5"
                   >
-                    <span className="text-xs text-gray-500">{n.label}</span>
-                    <span className="text-xs font-medium text-gray-700">
+                    <dt className="text-xs text-gray-500">{n.label}</dt>
+                    <dd className="m-0 text-xs font-medium text-gray-700">
                       {formatValue(nutrients[n.code], n.decimals ?? 1)} {n.unit}
-                    </span>
+                    </dd>
                   </div>
                 ))}
-              </div>
+              </dl>
             </div>
           ))}
         </div>

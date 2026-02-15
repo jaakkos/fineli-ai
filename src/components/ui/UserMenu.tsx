@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 
 interface UserMenuProps {
   email?: string;
@@ -63,7 +64,7 @@ export default function UserMenu({
         title={email ?? 'Anonyymi käyttäjä'}
       >
         {/* Simple user icon */}
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
         </svg>
       </button>
@@ -81,14 +82,14 @@ export default function UserMenu({
           </div>
 
           {/* Privacy policy link */}
-          <a
+          <Link
             href="/tietosuoja"
             className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
             role="menuitem"
             onClick={() => setOpen(false)}
           >
             Tietosuojaseloste
-          </a>
+          </Link>
 
           {/* Logout */}
           {!isAnonymous && (
@@ -107,8 +108,12 @@ export default function UserMenu({
           {/* Delete account — GDPR right to erasure */}
           <div className="border-t border-gray-100">
             {confirmDelete ? (
-              <div className="px-4 py-3">
-                <p className="mb-2 text-xs text-red-700">
+              <div
+                className="px-4 py-3"
+                role="alertdialog"
+                aria-label="Vahvista tilin poisto"
+              >
+                <p className="mb-2 text-xs text-red-700" aria-live="assertive">
                   Kaikki tietosi poistetaan pysyvästi. Tätä ei voi peruuttaa.
                 </p>
                 <div className="flex gap-2">

@@ -27,6 +27,7 @@ export default function QuickReplyButtons({
     <div
       role="group"
       aria-label="Valitse vaihtoehto"
+      aria-description={selectedKey ? 'Vaihtoehto valittu' : undefined}
       className={
         effectiveLayout === 'horizontal'
           ? 'flex flex-wrap gap-1.5'
@@ -40,6 +41,7 @@ export default function QuickReplyButtons({
             key={opt.key}
             disabled={disabled}
             onClick={() => onSelect(opt.key)}
+            aria-pressed={isSelected}
             className={`
               rounded-lg border px-2.5 py-1.5 text-left text-sm transition-colors
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1
