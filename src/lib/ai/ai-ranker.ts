@@ -12,6 +12,7 @@
 
 import type { FineliFood } from '@/types';
 import type { AIProvider } from './types';
+import { getAnthropicApiKey, getOpenAIApiKey, getAIConfig } from './config';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -185,10 +186,9 @@ async function callAnthropicRanking(
   prompt: string,
   signal?: AbortSignal
 ): Promise<RankedResult[]> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error('ANTHROPIC_API_KEY required');
-
-  const model = process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-20250514';
+  const apiKey = getAnthropicApiKey();
+  const config = getAIConfig();
+  const model = config.parseModel ?? 'claude-sonnet-4-20250514';
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     signal,
@@ -231,10 +231,9 @@ async function callOpenAIRanking(
   prompt: string,
   signal?: AbortSignal
 ): Promise<RankedResult[]> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error('OPENAI_API_KEY required');
-
-  const model = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
+  const apiKey = getOpenAIApiKey();
+  const config = getAIConfig();
+  const model = config.parseModel ?? 'gpt-4o-mini';
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     signal,

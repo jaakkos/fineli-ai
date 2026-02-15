@@ -293,7 +293,7 @@ export class OpenAIProvider implements AIProvider {
 
   private buildResponsePrompt(
     engineOutput: EngineStepResult,
-    context: AIConversationContext
+    _context: AIConversationContext
   ): string {
     const parts: string[] = [];
 

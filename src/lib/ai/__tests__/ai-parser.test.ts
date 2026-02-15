@@ -3,7 +3,7 @@
  * Uses mock AI providers to test the parse flow without real API calls.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { parseWithAI } from '../ai-parser';
 import type { AIProvider, AIConversationContext, AIConfig, AIParseResult } from '../types';
 import type { ConversationState, PendingQuestion } from '@/types';

@@ -275,7 +275,6 @@ test.describe('Chat conversation flow', () => {
 
   test('completing a meal adds items to the diary panel', async ({ page }) => {
     // The right panel shows "Aloita lisäämällä ruokia" when empty
-    const diaryPanel = page.locator('text=Ruoat').locator('..');
 
     // Step 1: Send food name
     await sendChatMessage(page, 'maitoa');
@@ -601,7 +600,6 @@ test.describe('Page refresh persistence', () => {
       await page.waitForTimeout(1000);
 
       // Previous messages should be loaded from DB
-      const chatLog = page.locator('[role="log"]');
       const msgs = await getChatMessages(page);
       // Should have more than just the default message
       expect(msgs.length).toBeGreaterThanOrEqual(1);

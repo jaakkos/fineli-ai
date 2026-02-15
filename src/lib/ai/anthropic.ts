@@ -22,10 +22,6 @@ import {
 // Anthropic API types (minimal, no SDK dependency)
 // ---------------------------------------------------------------------------
 
-interface AnthropicMessage {
-  role: 'user' | 'assistant';
-  content: string | AnthropicContentBlock[];
-}
 
 interface AnthropicContentBlock {
   type: 'text' | 'tool_use' | 'tool_result';
@@ -287,7 +283,7 @@ export class AnthropicProvider implements AIProvider {
 
   private buildResponsePrompt(
     engineOutput: EngineStepResult,
-    context: AIConversationContext
+    _context: AIConversationContext
   ): string {
     const parts: string[] = [];
 

@@ -11,7 +11,7 @@ import type {
   FineliApiComponent,
   FineliApiUnit,
 } from './types';
-import { normalizeQuery } from './search';
+import { normalizeQuery, FOOD_ALIASES } from './search';
 
 interface FineliClientConfig {
   baseUrl: string;
@@ -97,12 +97,14 @@ export class FineliClient {
   async searchFoods(query: string, lang?: string): Promise<FineliFood[]> {
     const langKey = lang ?? this.defaultLang;
     const normalizedQuery = normalizeQuery(query);
-    const cacheKey = `fineli:search:${normalizedQuery}:${langKey}`;
+    // Apply food aliases before search (e.g. "kevytmaito" → "maito, kevyt")
+    const searchQuery = FOOD_ALIASES[normalizedQuery] ?? normalizedQuery;
+    const cacheKey = `fineli:search:${searchQuery}:${langKey}`;
 
     const cached = this.cache.get<FineliFood[]>(cacheKey);
     if (cached) return cached;
 
-    const url = `${this.baseUrl}/foods?q=${encodeURIComponent(normalizedQuery)}&lang=${langKey}`;
+    const url = `${this.baseUrl}/foods?q=${encodeURIComponent(searchQuery)}&lang=${langKey}`;
     const res = await fetch(url);
     if (!res.ok) {
       const stale = this.cache.getStale<FineliFood[]>(cacheKey);

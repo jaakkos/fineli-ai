@@ -13,7 +13,7 @@
  */
 
 import type { AIProvider, AIParseResult, AIConversationContext, AIConfig } from './types';
-import type { ClassifiedIntent, ParsedAnswer } from '@/lib/conversation/parser';
+import type { ClassifiedIntent } from '@/lib/conversation/parser';
 import type { ParsedMealItem, PendingQuestion } from '@/types';
 import { classifyIntent, parseMealText } from '@/lib/conversation/parser';
 
@@ -36,6 +36,9 @@ const SIMPLE_REJECT = /^(?:(?:ei\s+)?mikään\s+näistä|none|ei\s+yksikään)$/
 const SIMPLE_CORRECTION = /^(?:ei[,.]?\s*(?:tarkoitin|tarkoitan)|actually|vaihda)\s+/i;
 const SIMPLE_REMOVAL = /^(?:poista|remove|delete)\s+/i;
 const SIMPLE_PORTION_UPDATE = /^(?:vaihda|change to|muuta)\s+\d+(?:[.,]\d+)?\s*g$/i;
+// "väärin" / "peru" / "poista viimeisin" — undo/remove last item
+const SIMPLE_WRONG = /^(?:väärin|väärä|wrong|undo|peru|peruuta)$/i;
+const SIMPLE_REMOVE_LAST = /^(?:poista|remove|delete)\s+(?:viimeisin|viiminen|viimeinen|edellinen|se|tuo|that|last)$/i;
 
 /**
  * Check if the message is a structured input that regex handles perfectly.
@@ -60,6 +63,8 @@ function isStructuredInput(message: string, pendingQuestion: PendingQuestion | n
   // Universal patterns that work regardless of context
   if (SIMPLE_YES_NO.test(trimmed)) return true;
   if (SIMPLE_DONE.test(trimmed)) return true;
+  if (SIMPLE_WRONG.test(trimmed)) return true;
+  if (SIMPLE_REMOVE_LAST.test(trimmed)) return true;
   if (SIMPLE_CORRECTION.test(trimmed)) return true;
   if (SIMPLE_REMOVAL.test(trimmed)) return true;
   if (SIMPLE_PORTION_UPDATE.test(trimmed)) return true;

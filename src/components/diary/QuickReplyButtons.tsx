@@ -27,7 +27,7 @@ export default function QuickReplyButtons({
     <div
       role="group"
       aria-label="Valitse vaihtoehto"
-      aria-description={selectedKey ? 'Vaihtoehto valittu' : undefined}
+      
       className={
         effectiveLayout === 'horizontal'
           ? 'flex flex-wrap gap-1.5'

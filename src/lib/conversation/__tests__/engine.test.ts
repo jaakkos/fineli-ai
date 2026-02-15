@@ -3,9 +3,9 @@
  * Uses mock FineliClient and PortionConverter to test processMessage flows end-to-end.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { processMessage, type EngineStepResult } from '../engine';
+import { processMessage } from '../engine';
 import type { ConversationState, FineliFood, FineliUnit } from '@/types';
-import { newId } from '@/types';
+
 
 // ---------------------------------------------------------------------------
 // Mock factories
@@ -249,7 +249,7 @@ describe('processMessage — conversation engine', () => {
         return [KAURAPUURO_VEDELLA, KAURAPUURO_MAIDOLLA];
       });
 
-      const result = await processMessage('vesipuuro', step1.updatedState, client, converter);
+      await processMessage('vesipuuro', step1.updatedState, client, converter);
       expect(client.searchFoods).toHaveBeenCalledWith('vesipuuro', 'fi');
     });
 

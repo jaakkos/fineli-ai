@@ -27,7 +27,6 @@ import {
   generatePortionQuestion,
   generateCompletionMessage,
   generateCompanionQuestion,
-  generateNoMatchQuestion,
   formatConfirmation,
   formatAddedNotice,
   MAX_NO_MATCH_RETRIES,
@@ -585,15 +584,36 @@ export async function processWithIntent(
     case 'removal': {
       const data = intent.data as { type: string; targetText?: string };
       if (data?.targetText) {
-        const target = state.items.find(
-          (i) =>
-            i.rawText.toLowerCase().includes(data.targetText!.toLowerCase()) ||
-            data.targetText!.toLowerCase().includes(i.rawText.toLowerCase())
-        );
+        let target: typeof state.items[number] | undefined;
+
+        if (data.targetText === '__LAST__') {
+          // "väärin" / "poista viimeisin" → remove the most recently added item
+          // Search backwards through items for the last RESOLVED or most recent item
+          for (let i = state.items.length - 1; i >= 0; i--) {
+            if (state.items[i].state === 'RESOLVED') {
+              target = state.items[i];
+              break;
+            }
+          }
+          // If no resolved item, take the very last item
+          if (!target && state.items.length > 0) {
+            target = state.items[state.items.length - 1];
+          }
+        } else {
+          target = state.items.find(
+            (i) =>
+              i.rawText.toLowerCase().includes(data.targetText!.toLowerCase()) ||
+              data.targetText!.toLowerCase().includes(i.rawText.toLowerCase())
+          );
+        }
+
         if (target) {
+          const displayName = target.selectedFood?.nameFi ?? target.rawText;
           state = removeItemFromState(state, target.id);
-          assistantMessage = `Poistin "${target.rawText}" listalta. `;
+          assistantMessage = `Poistin "${displayName}" listalta. `;
           state = { ...state, pendingQuestion: null };
+        } else {
+          assistantMessage = 'Ei poistettavia ruokia. ';
         }
       }
       break;

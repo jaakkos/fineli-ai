@@ -11,14 +11,6 @@ async function readWorkbook(buffer: Buffer): Promise<ExcelJS.Workbook> {
   return wb;
 }
 
-// Helper: get cell values from a row
-function rowValues(row: ExcelJS.Row): unknown[] {
-  const values: unknown[] = [];
-  row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-    values[colNumber - 1] = cell.value;
-  });
-  return values;
-}
 
 // Minimal export input factory
 function makeInput(overrides: Partial<ExportInput> = {}): ExportInput {

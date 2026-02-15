@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { and, eq, isNull } from 'drizzle-orm';
+import { eq, isNull } from 'drizzle-orm';
 import { createTestDb } from './helpers/test-db';
 import * as schema from '@/lib/db/schema';
 import { newId } from '@/types';

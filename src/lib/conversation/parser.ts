@@ -148,6 +148,10 @@ const CORRECTION_PATTERN = /^(?:ei[,.]?\s*(?:tarkoitin|tarkoitan)|actually|vaihd
 const REMOVAL_PATTERN = /^(?:poista|remove|delete)\s+(.+)$/i;
 const UPDATE_PORTION_PATTERN = /^(?:vaihda|change to|muuta)\s+(\d+(?:[.,]\d+)?)\s*g$/i;
 const DONE_PATTERN = /^(?:valmis|siinä kaikki|done|that's all|ei muuta|no more|siinäpä se|seis)$/i;
+// "väärin" alone after a confirmation → undo last added item
+const WRONG_PATTERN = /^(?:väärin|väärä|wrong|undo|peru|peruuta)$/i;
+// "poista viimeisin/se/edellinen" → remove the most recently added item
+const REMOVE_LAST_PATTERN = /^(?:poista|remove|delete)\s+(?:viimeisin|viiminen|viimeinen|edellinen|se|tuo|that|last)$/i;
 
 // Minimal fallback splitter (no Finnish normalization)
 const ITEM_SPLITTERS = /(?:\s*,\s*|\s+ja\s+|\s+sekä\s+|\s+and\s+|\s+with\s+|\s*\+\s*)/i;
@@ -316,7 +320,17 @@ export function classifyIntent(
     if (answer) return { type: 'answer', data: answer };
   }
 
-  // 2. Update portion: "vaihda 150g"
+  // 2. "väärin" / "peru" → undo last added (special removal of most recent item)
+  if (WRONG_PATTERN.test(trimmed)) {
+    return { type: 'removal', data: { type: 'removal', targetText: '__LAST__' } };
+  }
+
+  // 3. "poista viimeisin/se" → remove last item
+  if (REMOVE_LAST_PATTERN.test(trimmed)) {
+    return { type: 'removal', data: { type: 'removal', targetText: '__LAST__' } };
+  }
+
+  // 4. Update portion: "vaihda 150g"
   const updateMatch = trimmed.match(UPDATE_PORTION_PATTERN);
   if (updateMatch) {
     return {
@@ -325,30 +339,30 @@ export function classifyIntent(
     };
   }
 
-  // 3. Correction: "ei, tarkoitin lohta"
+  // 5. Correction: "ei, tarkoitin lohta"
   const correctionMatch = trimmed.match(CORRECTION_PATTERN);
   if (correctionMatch) {
     return { type: 'correction', data: { type: 'correction', newText: correctionMatch[1].trim() } };
   }
 
-  // 4. Removal: "poista kanaa"
+  // 6. Removal: "poista kanaa"
   const removalMatch = trimmed.match(REMOVAL_PATTERN);
   if (removalMatch) {
     return { type: 'removal', data: { type: 'removal', targetText: removalMatch[1].trim() } };
   }
 
-  // 5. Done: "valmis", "siinä kaikki"
+  // 7. Done: "valmis", "siinä kaikki"
   if (DONE_PATTERN.test(trimmed)) {
     return { type: 'done', data: null };
   }
 
-  // 6. Anything else → treat as food text (minimal splitting, no Finnish normalization)
+  // 8. Anything else → treat as food text (minimal splitting, no Finnish normalization)
   const items = parseMealText(trimmed);
   if (items.length > 0) {
     return { type: 'add_items', data: items };
   }
 
-  // 7. Default fallback
+  // 9. Default fallback
   if (pendingQuestion) {
     if (pendingQuestion.type === 'disambiguation' || pendingQuestion.type === 'no_match_retry') {
       return { type: 'answer', data: { type: 'clarification', text: trimmed } };

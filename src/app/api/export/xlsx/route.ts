@@ -136,7 +136,9 @@ export async function GET(request: NextRequest) {
       {
         error: {
           code: 'EXPORT_ERROR',
-          message: err instanceof Error ? err.message : 'Export failed',
+          message: process.env.NODE_ENV === 'development' && err instanceof Error
+            ? err.message
+            : 'Vienti epäonnistui. Yritä uudelleen.',
         },
       },
       { status: 500 }

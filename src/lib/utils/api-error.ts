@@ -44,6 +44,6 @@ export function handleRouteError(error: unknown): NextResponse {
   const message =
     process.env.NODE_ENV === 'development' && error instanceof Error
       ? error.message
-      : 'An unexpected error occurred';
+      : 'Odottamaton virhe. Yritä uudelleen.';
   return apiErrorResponse(ERROR_CODES.INTERNAL_ERROR, message, 500);
 }

@@ -8,7 +8,7 @@ import { handleRouteError } from '@/lib/utils/api-error';
 /**
  * DELETE /api/auth/account
  *
- * GDPR Art. 17 — Right to erasure ("right to be forgotten").
+ * GDPR Art. 17 - Right to erasure ("right to be forgotten").
  * Permanently deletes the user record and all associated data
  * (diary days, meals, items, conversations, auth tokens) via CASCADE,
  * then clears the session cookie.
@@ -17,13 +17,10 @@ export async function DELETE() {
   try {
     const session = await requireSession();
     const db = await getDbUnified();
-    const raw = db.raw;
-    const s = db.schema;
 
-    // Delete user — ON DELETE CASCADE removes all child records:
-    // auth_tokens, diary_days → meals → meal_items, conversation_messages, conversation_state
+    // Delete user - ON DELETE CASCADE removes all child records
     await db.run(
-      raw.delete(s.users).where(eq(s.users.id, session.userId))
+      db.raw.delete(db.schema.users).where(eq(db.schema.users.id, session.userId))
     );
 
     // Clear session cookie
@@ -47,23 +44,21 @@ export async function DELETE() {
 /**
  * GET /api/auth/account
  *
- * GDPR Art. 15 — Right of access.
+ * GDPR Art. 15 - Right of access.
  * Returns the user's stored personal data summary.
  */
 export async function GET() {
   try {
     const session = await requireSession();
     const db = await getDbUnified();
-    const raw = db.raw;
-    const s = db.schema;
 
     const user = await db.selectOne(
-      raw.select({
-        id: s.users.id,
-        email: s.users.email,
-        emailVerifiedAt: s.users.emailVerifiedAt,
-        createdAt: s.users.createdAt,
-      }).from(s.users).where(eq(s.users.id, session.userId))
+      db.raw.select({
+        id: db.schema.users.id,
+        email: db.schema.users.email,
+        emailVerifiedAt: db.schema.users.emailVerifiedAt,
+        createdAt: db.schema.users.createdAt,
+      }).from(db.schema.users).where(eq(db.schema.users.id, session.userId))
     ) as { id: string; email: string | null; emailVerifiedAt: string | null; createdAt: string } | undefined;
 
     if (!user) {

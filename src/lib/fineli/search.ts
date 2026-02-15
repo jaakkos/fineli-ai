@@ -9,16 +9,60 @@ export function normalizeQuery(input: string): string {
 }
 
 export const FOOD_ALIASES: Record<string, string> = {
+  // Dairy
   maito: 'maito',
   kevytmaito: 'maito, kevyt',
   'rasvaton maito': 'maito, rasvaton',
   täysmaito: 'maito, täysi',
+  'ykkösmaito': 'maito, kevyt',
+  piimä: 'piimä',
+  kerma: 'kerma',
+  jogurtti: 'jogurtti',
+  rahka: 'rahka',
+  // Grains
   puuro: 'kaurapuuro',
-  omena: 'omena',
-  kahvi: 'kahvi',
+  riisipuuro: 'riisipuuro',
   leipä: 'leipä',
+  ruisleipä: 'ruisleipä',
+  paahtoleipä: 'paahtoleipä',
+  sämpylä: 'sämpylä',
+  // Spreads & cheese
   voi: 'voi',
+  margariini: 'margariini',
   juusto: 'juusto',
+  'edam': 'juusto, edam',
+  'emmental': 'juusto, emmental',
+  // Meat & deli
+  kinkku: 'kinkku, keittokinkku',
+  keittokinkku: 'kinkku, keittokinkku',
+  kalkkuna: 'kalkkunaleikkele',
+  meetvursti: 'meetvursti',
+  // Prepared dishes — common Fineli naming
+  'kana curry': 'curry, kananliha',
+  'kanacurry': 'curry, kananliha',
+  'chicken curry': 'curry, kananliha',
+  'nakkikeitto': 'nakkikeitto',
+  'hernekeitto': 'hernekeitto',
+  'lihakeitto': 'lihakeitto',
+  'kalakeitto': 'kalakeitto',
+  'pinaattikeitto': 'pinaattikeitto',
+  'hampurilainen': 'hampurilainen',
+  'juustohampurilainen': 'hampurilainen, juusto',
+  'pizza': 'pizza',
+  'kebab': 'kebab',
+  'makaronilaatikko': 'makaronilaatikko',
+  'lasagne': 'lasagne',
+  'lihapiirakka': 'lihapiirakka',
+  'karjalanpiirakka': 'karjalanpiirakka',
+  'karjalanpaisti': 'karjalanpaisti',
+  'kaalilaatikko': 'kaalilaatikko',
+  'maksalaatikko': 'maksalaatikko',
+  // Fruits & basics
+  omena: 'omena',
+  banaani: 'banaani',
+  kahvi: 'kahvi',
+  tee: 'tee',
+  mehu: 'mehu',
 };
 
 /**

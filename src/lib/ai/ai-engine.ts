@@ -126,14 +126,19 @@ export async function processMessageWithAI(
   let parsedIntent: import('@/lib/conversation/parser').ClassifiedIntent | null = null;
 
   try {
+    const parseController = new AbortController();
+    const parseTimeout = setTimeout(() => parseController.abort(), 5000);
+
     const parseResult = await Promise.race([
       parseWithAI(userMessage, context, {
         provider: aiProvider,
         config,
+      }).finally(() => clearTimeout(parseTimeout)),
+      new Promise<never>((_, reject) => {
+        parseController.signal.addEventListener('abort', () =>
+          reject(new Error('AI parse timeout'))
+        );
       }),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('AI parse timeout')), 5000)
-      ),
     ]);
 
     aiParsed = parseResult.source === 'ai';
@@ -141,8 +146,11 @@ export async function processMessageWithAI(
     // Note: searchHints and portionEstimates are already applied inside
     // ai-parser.ts (item.text = searchHint, amount = portionEstimateGrams).
     // No further processing needed here.
-  } catch {
+  } catch (err) {
     // AI parse failed or timed out — engine will use regex fallback
+    if (err instanceof Error && err.message === 'AI parse timeout') {
+      console.warn('[AI Engine] Parse timed out after 5s, falling back to regex');
+    }
   }
 
   // --- Phase 2: Run state machine with parsed intent ---
@@ -176,18 +184,27 @@ export async function processMessageWithAI(
 
   if (config.useAIResponses && !hasStructuredQuestion) {
     try {
+      const respController = new AbortController();
+      const respTimeout = setTimeout(() => respController.abort(), 5000);
+
       const updatedContext = buildContext(engineResult.updatedState, mealType);
       const responseResult = await Promise.race([
-        aiProvider.generateResponse(engineResult, updatedContext),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('AI response timeout')), 5000)
-        ),
+        aiProvider.generateResponse(engineResult, updatedContext)
+          .finally(() => clearTimeout(respTimeout)),
+        new Promise<never>((_, reject) => {
+          respController.signal.addEventListener('abort', () =>
+            reject(new Error('AI response timeout'))
+          );
+        }),
       ]);
       aiMessage = responseResult.message;
       suggestions = responseResult.suggestions;
       aiResponse = true;
-    } catch {
+    } catch (err) {
       // AI response failed or timed out — use engine's template response
+      if (err instanceof Error && err.message === 'AI response timeout') {
+        console.warn('[AI Engine] Response generation timed out after 5s');
+      }
     }
   }
 

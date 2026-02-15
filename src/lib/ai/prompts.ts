@@ -104,15 +104,31 @@ SÄÄNNÖT:
    - "savulohileipä" = leipä + voi + savulohi
    - "munavoileipä" = leipä + voi + kananmuna
 
-   ÄLÄ PURA näitä (vakiintuneita yksittäistuotteita):
-   - "jauhelihakastike", "kaurapuuro", "voileipäkeksi", "suklaakakku"
-   - "maitosuklaalevy", "juustokumina", "tomaattiketsuppi"
+   ÄLÄ PURA näitä (vakiintuneita yksittäistuotteita Finelissä):
+   Keitot: "lihakeitto", "hernekeitto", "kalakeitto", "pinaattikeitto", "nakkikeitto", "kanakeitto"
+   Laatikot: "makaronilaatikko", "kaalilaatikko", "maksalaatikko", "lasagne"
+   Piirakat: "lihapiirakka", "karjalanpiirakka", "karjalanpaisti"
+   Muut: "jauhelihakastike", "kaurapuuro", "riisipuuro", "voileipäkeksi", "suklaakakku",
+          "maitosuklaalevy", "juustokumina", "tomaattiketsuppi",
+          "hampurilainen", "juustohampurilainen", "pizza", "kebab",
+          "kalapuikko", "lihapulla", "makkarakastike"
+
+   VALMISRUOAT JA RUOKALAJIT — etsi kokonaisena Finelistä:
+   - "kana curry" / "kanacurry" → searchHint: "curry, kananliha" (Fineli-nimellä!)
+   - "lihakeitto" → searchHint: "lihakeitto" (ÄLÄ pura liha + keitto)
+   - "hampurilainen" → searchHint: "hampurilainen" (ÄLÄ pura osiin)
+   - "pizza margherita" → searchHint: "pizza" (Fineli: "Pizza, juusto-tomaatti")
+   - "makaronilaatikko" → searchHint: "makaronilaatikko"
+   - "hernekeitto" → searchHint: "hernekeitto"
+   - "jauhelihakastike" → searchHint: "jauhelihakastike"
+   HUOM: Jos valmisruoka on Finelistä, käytä SITÄ. Älä pura osiin.
 
    YLEISSÄÄNTÖ: Jos yhdyssana yhdistää TUNNISTETTAVIA erillisiä ruoka-aineita
    (esim. [ruoka1][ruoka2][leipä/sämpylä/salaatti/riisi]), pura osiin ja anna
    jokaiselle oletusannos. Älä pura jos sana on vakiintunut nimike yhdelle
-   tuotteelle tai valmisteelle. Käytä esimerkkejä yllä ohjenuorana, mutta sovella
-   samaa logiikkaa KAIKKIIN yhdyssanoihin — myös sellaisiin joita ei ole listattu.
+   tuotteelle, valmisteelle, keitolle, laatikolle tai valmisruoalle.
+   Käytä esimerkkejä yllä ohjenuorana, mutta sovella samaa logiikkaa
+   KAIKKIIN yhdyssanoihin — myös sellaisiin joita ei ole listattu.
 
    TÄRKEÄ: Kun käyttäjä sanoo yhdistelmäruuan ILMAN tarkkoja täytteitä, kysy mitä täytteitä.
    Mutta kun täytteet on kerrottu, pura ne suoraan ja anna kaikille oletusannokset.
@@ -268,8 +284,8 @@ export const PARSE_TOOL_ANTHROPIC = {
       },
       answerPortionSize: {
         type: 'string',
-        enum: ['pieni', 'normaali', 'iso'],
-        description: 'Koon vastaus annoskysymykseen',
+        enum: ['pieni', 'keskikokoinen', 'normaali', 'iso', 'suuri'],
+        description: 'Koon vastaus annoskysymykseen (pieni/keskikokoinen/normaali/iso/suuri)',
       },
       companionResponse: {
         type: 'boolean',

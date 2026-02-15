@@ -51,7 +51,9 @@ export async function GET(request: NextRequest) {
       {
         error: {
           code: 'FINELI_ERROR',
-          message: err instanceof Error ? err.message : 'Search failed',
+          message: process.env.NODE_ENV === 'development' && err instanceof Error
+            ? err.message
+            : 'Haku epäonnistui. Yritä uudelleen.',
         },
       },
       { status: 502 }

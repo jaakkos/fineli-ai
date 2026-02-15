@@ -1,7 +1,6 @@
 'use client';
 
 import React, {
-  Suspense,
   useState,
   useCallback,
   useEffect,
@@ -82,7 +81,7 @@ function HomeContent() {
   const updateItem = useUpdateItem();
 
   // Resolve current meal: by URL mealId or by selected meal type
-  const meals = dayData?.meals ?? [];
+  const meals = useMemo(() => dayData?.meals ?? [], [dayData?.meals]);
   const currentMeal = useMemo((): MealWithItems | null => {
     const mealList = meals as MealWithItems[];
     if (urlMealId) {

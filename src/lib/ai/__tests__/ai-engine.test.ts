@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { processMessageWithAI } from '../ai-engine';
-import type { AIProvider, AIConversationContext, AIParseResult } from '../types';
+import type { AIProvider, AIParseResult } from '../types';
 import type { ConversationState, FineliFood, FineliUnit } from '@/types';
 
 // ---------------------------------------------------------------------------
@@ -73,7 +73,7 @@ function mockFineliClient(searchResults: Record<string, FineliFood[]> = {}) {
 // Mock PortionConverter
 function mockPortionConverter() {
   return {
-    convert: vi.fn((amount: number, unit: string | null | undefined, fineliUnits: FineliUnit[]) => {
+    convert: vi.fn((amount: number, unit: string | null | undefined, _fineliUnits: FineliUnit[]) => {
       if (unit === null || unit === undefined || unit === '') {
         return { grams: amount, unitCode: 'G', unitLabel: 'g', method: 'direct_grams' };
       }
