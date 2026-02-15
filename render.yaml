@@ -12,7 +12,7 @@ services:
     runtime: node
     plan: free
 
-    buildCommand: pnpm install && pnpm db:migrate:pg && pnpm db:seed && pnpm build
+    buildCommand: pnpm install && pnpm db:push && pnpm db:seed && pnpm build
     startCommand: pnpm start
 
     envVars:
