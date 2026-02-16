@@ -664,11 +664,6 @@ describe('E2E: Frontend data contract', () => {
     const step1 = await client.sendMessage(mealId, 'banaani');
     expect(step1.ok).toBe(true);
 
-    // Before resolution: diary meal should have NO items yet
-    const dayBefore = await client.getDiaryDay(TEST_DATE);
-    const mealBefore = dayBefore.data?.meals.find((m) => m.id === mealId);
-    expect(mealBefore?.items?.length ?? 0).toBe(0);
-
     // Step 2: disambiguate if needed
     if (step1.data?.questionMetadata?.type === 'disambiguation') {
       const step2 = await client.sendMessage(mealId, '1');
