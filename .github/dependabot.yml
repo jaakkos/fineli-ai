@@ -6,10 +6,17 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 10
+    versioning-strategy: increase
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "deps"
+      include: scope
     groups:
       next:
         patterns:
           - "next"
+          - "eslint"
           - "eslint-config-next"
       react:
         patterns:
@@ -17,8 +24,11 @@ updates:
           - "react-dom"
           - "@types/react"
           - "@types/react-dom"
-      drizzle:
+          - "@tanstack/react-query"
+      database:
         patterns:
+          - "pg"
+          - "@types/pg"
           - "drizzle-orm"
           - "drizzle-kit"
       testing:
@@ -33,9 +43,20 @@ updates:
         patterns:
           - "typescript"
           - "@types/node"
-          - "@types/better-sqlite3"
-          - "@types/pg"
+      build-tools:
+        patterns:
+          - "tsx"
+          - "adm-zip"
           - "@types/adm-zip"
+      minor-deps:
+        patterns:
+          - "date-fns"
+          - "exceljs"
+          - "flexsearch"
+          - "jose"
+          - "nanoid"
+          - "resend"
+          - "zod"
 
   - package-ecosystem: github-actions
     directory: /
@@ -43,4 +64,8 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
-
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "ci"
+      include: scope

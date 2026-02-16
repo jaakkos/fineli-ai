@@ -10,7 +10,7 @@ Finnish food diary app. Users log meals in natural language (Finnish), AI maps t
 ## Stack
 
 - Next.js 16 App Router, React 19, TypeScript 5 (strict)
-- Drizzle ORM — SQLite (local dev) / PostgreSQL (production)
+- Drizzle ORM — PostgreSQL (`pg`)
 - Tailwind CSS 4, TanStack React Query 5
 - Vitest (unit), Playwright (E2E), pnpm
 

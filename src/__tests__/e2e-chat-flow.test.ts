@@ -4,12 +4,12 @@
  * Tests the full pipeline: user message → parser → engine → Fineli search →
  * state machine → DB persistence → response.
  *
- * Uses a real in-memory SQLite DB and mocked Fineli client (to avoid
+ * Uses a real PostgreSQL test DB and mocked Fineli client (to avoid
  * network calls), but exercises every layer in between.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createTestDb } from './helpers/test-db';
+import { createTestDb, truncateAllTables } from './helpers/test-db';
 import { processMessage } from '@/lib/conversation/engine';
 import { processMessageWithAI } from '@/lib/ai/ai-engine';
 import type { FineliClient } from '@/lib/fineli/client';
@@ -156,15 +156,15 @@ function freshState(mealId: string): ConversationState {
   };
 }
 
-function setupTestData(db: ReturnType<typeof createTestDb>['db']) {
+async function setupTestData(db: ReturnType<typeof createTestDb>['db']) {
   const userId = newId();
   const dayId = newId();
   const mealId = newId();
   const now = new Date().toISOString();
 
-  db.insert(schema.users).values({ id: userId, createdAt: now, updatedAt: now }).run();
-  db.insert(schema.diaryDays).values({ id: dayId, userId, date: '2026-02-15', createdAt: now, updatedAt: now }).run();
-  db.insert(schema.meals).values({ id: mealId, diaryDayId: dayId, mealType: 'breakfast', sortOrder: 0, createdAt: now, updatedAt: now, version: 1 }).run();
+  await db.insert(schema.users).values({ id: userId, createdAt: now, updatedAt: now });
+  await db.insert(schema.diaryDays).values({ id: dayId, userId, date: '2026-02-15', createdAt: now, updatedAt: now });
+  await db.insert(schema.meals).values({ id: mealId, diaryDayId: dayId, mealType: 'breakfast', sortOrder: 0, createdAt: now, updatedAt: now, version: 1 });
 
   return { userId, dayId, mealId };
 }
@@ -453,15 +453,18 @@ describe('E2E: Chat conversation flow (with mock AI)', () => {
 describe('E2E: DB persistence of chat messages', () => {
   let client: FineliClient;
   let converter: PortionConverter;
+  let db: ReturnType<typeof createTestDb>['db'];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     client = createMockFineliClient();
     converter = createMockPortionConverter();
+    const testDb = createTestDb();
+    db = testDb.db;
+    await truncateAllTables(db);
   });
 
   it('saves user and assistant messages to DB and reloads state', async () => {
-    const { db } = createTestDb();
-    const { mealId } = setupTestData(db);
+    const { mealId } = await setupTestData(db);
 
     const state = freshState(mealId);
 
@@ -470,10 +473,9 @@ describe('E2E: DB persistence of chat messages', () => {
 
     // Simulate what the route does: save messages
     const now = new Date().toISOString();
-    db.insert(schema.conversationMessages)
-      .values({ id: newId(), mealId, role: 'user', content: 'kaurapuuroa', metadata: null, createdAt: now })
-      .run();
-    db.insert(schema.conversationMessages)
+    await db.insert(schema.conversationMessages)
+      .values({ id: newId(), mealId, role: 'user', content: 'kaurapuuroa', metadata: null, createdAt: now });
+    await db.insert(schema.conversationMessages)
       .values({
         id: newId(),
         mealId,
@@ -481,35 +483,31 @@ describe('E2E: DB persistence of chat messages', () => {
         content: result.assistantMessage,
         metadata: result.questionMetadata ? { questionMetadata: result.questionMetadata } : null,
         createdAt: now,
-      })
-      .run();
+      });
 
     // Save conversation state
-    db.insert(schema.conversationState)
+    await db.insert(schema.conversationState)
       .values({
         mealId,
         stateJson: result.updatedState as unknown as Record<string, unknown>,
         updatedAt: now,
-      })
-      .run();
+      });
 
     // Reload state
-    const stateRow = db
+    const [stateRow] = await db
       .select()
       .from(schema.conversationState)
-      .where(eq(schema.conversationState.mealId, mealId))
-      .get();
+      .where(eq(schema.conversationState.mealId, mealId));
 
     const loadedState = stateRow!.stateJson as unknown as ConversationState;
     expect(loadedState.items.length).toBeGreaterThan(0);
     expect(loadedState.mealId).toBe(mealId);
 
     // Reload messages
-    const messages = db
+    const messages = await db
       .select()
       .from(schema.conversationMessages)
-      .where(eq(schema.conversationMessages.mealId, mealId))
-      .all();
+      .where(eq(schema.conversationMessages.mealId, mealId));
 
     expect(messages.length).toBe(2);
     expect(messages[0].role).toBe('user');
@@ -519,8 +517,7 @@ describe('E2E: DB persistence of chat messages', () => {
   });
 
   it('persists resolved items to meal_items table', async () => {
-    const { db } = createTestDb();
-    const { mealId } = setupTestData(db);
+    const { mealId } = await setupTestData(db);
 
     let state = freshState(mealId);
 
@@ -536,7 +533,7 @@ describe('E2E: DB persistence of chat messages', () => {
       // Save resolved items
       for (const item of step1b.resolvedItems) {
         const now = new Date().toISOString();
-        db.insert(schema.mealItems)
+        await db.insert(schema.mealItems)
           .values({
             id: newId(),
             mealId,
@@ -551,15 +548,13 @@ describe('E2E: DB persistence of chat messages', () => {
             sortOrder: 0,
             createdAt: now,
             updatedAt: now,
-          })
-          .run();
+          });
       }
 
-      const items = db
+      const items = await db
         .select()
         .from(schema.mealItems)
-        .where(eq(schema.mealItems.mealId, mealId))
-        .all();
+        .where(eq(schema.mealItems.mealId, mealId));
 
       expect(items.length).toBeGreaterThan(0);
       expect(items[0].fineliNameFi).toContain('Maito');
@@ -568,8 +563,7 @@ describe('E2E: DB persistence of chat messages', () => {
   });
 
   it('full multi-turn flow with DB round-trips', async () => {
-    const { db } = createTestDb();
-    const { mealId } = setupTestData(db);
+    const { mealId } = await setupTestData(db);
 
     let state = freshState(mealId);
 
@@ -578,19 +572,17 @@ describe('E2E: DB persistence of chat messages', () => {
     state = step1.updatedState;
 
     // Save and reload state (simulating request boundaries)
-    db.insert(schema.conversationState)
+    await db.insert(schema.conversationState)
       .values({
         mealId,
         stateJson: state as unknown as Record<string, unknown>,
         updatedAt: new Date().toISOString(),
-      })
-      .run();
+      });
 
-    const reloaded1 = db
+    const [reloaded1] = await db
       .select()
       .from(schema.conversationState)
-      .where(eq(schema.conversationState.mealId, mealId))
-      .get();
+      .where(eq(schema.conversationState.mealId, mealId));
     state = reloaded1!.stateJson as unknown as ConversationState;
 
     // Turn 2: Select option
@@ -598,19 +590,17 @@ describe('E2E: DB persistence of chat messages', () => {
     state = step2.updatedState;
 
     // Save and reload
-    db.update(schema.conversationState)
+    await db.update(schema.conversationState)
       .set({
         stateJson: state as unknown as Record<string, unknown>,
         updatedAt: new Date().toISOString(),
       })
-      .where(eq(schema.conversationState.mealId, mealId))
-      .run();
+      .where(eq(schema.conversationState.mealId, mealId));
 
-    const reloaded2 = db
+    const [reloaded2] = await db
       .select()
       .from(schema.conversationState)
-      .where(eq(schema.conversationState.mealId, mealId))
-      .get();
+      .where(eq(schema.conversationState.mealId, mealId));
     state = reloaded2!.stateJson as unknown as ConversationState;
 
     // Turn 3: Set portion

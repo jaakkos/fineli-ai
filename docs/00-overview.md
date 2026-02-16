@@ -70,7 +70,7 @@ A conversational food diary web app that lets users describe what they ate in na
 | Frontend | Next.js 14+ (App Router), React 18, TypeScript |
 | Styling | Tailwind CSS |
 | Backend | Next.js API Routes (same project) |
-| Database | SQLite (MVP, zero-setup) → PostgreSQL (production, via Drizzle ORM swap) |
+| Database | PostgreSQL (`pg` + drizzle-orm/node-postgres) |
 | Auth | Anonymous sessions + email magic link (custom or Supabase Auth) |
 | Food data | Fineli Open Data REST API (`fineli.fi/fineli/api/v1/`) |
 | Export | `exceljs` library for `.xlsx` generation |

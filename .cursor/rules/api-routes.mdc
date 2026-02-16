@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 
 - Always check `getSession()` first — return 401 if null.
 - Validate all input with Zod. Return `VALIDATION_ERROR` (400) with `error.flatten()` on failure.
-- Use `getDbUnified()` for database access — works for both SQLite and PostgreSQL.
+- Use `getDbUnified()` for database access (PostgreSQL).
 - Wrap everything in try/catch with `handleRouteError(error)`.
 - Error codes: `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`.
 - Response shape: `{ error: { code, message, details? } }` for errors.

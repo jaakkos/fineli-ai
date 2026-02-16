@@ -28,9 +28,8 @@
 │  └──────────┘  └──────────────┘  └────────────────────────┘ │
 └──────────────────────────────────────────────────────────────┘
          │                │                    │
-  SQLite (MVP)     Fineli API           In-memory cache
-  PostgreSQL       (fineli.fi)
-  (future)
+  PostgreSQL       Fineli API           In-memory cache
+  (pg)             (fineli.fi)
 ```
 
 ## Request Flow: User Sends a Chat Message
@@ -128,9 +127,8 @@ fineli-ai/
 │   │       └── Spinner.tsx
 │   ├── lib/                       # Shared logic
 │   │   ├── db/
-│   │   │   ├── client.ts          # PostgreSQL client (pg / drizzle)
-│   │   │   ├── schema.ts          # Table definitions
-│   │   │   └── migrations/        # SQL migration files
+│   │   │   ├── client.ts          # PostgreSQL client (pg / drizzle), getDbUnified()
+│   │   │   └── schema.ts          # Table definitions (pg-core)
 │   │   ├── fineli/
 │   │   │   ├── client.ts          # Fineli API client with caching
 │   │   │   ├── types.ts           # Fineli response types
@@ -161,9 +159,8 @@ fineli-ai/
 ├── tailwind.config.ts
 ├── next.config.ts
 ├── .env.local.example
-├── docker-compose.yml             # PostgreSQL (optional, for later)
-└── data/                          # SQLite database file (gitignored)
-    └── fineli.db
+├── docker-compose.yml             # PostgreSQL for local dev
+└── data/                          # Fineli index JSON (gitignored)
 ```
 
 ---
@@ -174,19 +171,15 @@ For laptop development and initial deployment:
 
 ```
 Local development:
+  - Docker for PostgreSQL: docker compose up -d
   - Next.js dev server (pnpm dev)
-  - SQLite file at ./data/fineli.db (zero setup, no Docker needed)
+  - pnpm db:push to apply schema
   - No external services needed (Fineli API is public)
 
-Production (future):
-  - Vercel (Next.js) or similar
-  - PostgreSQL via Supabase / Neon (swap Drizzle driver)
+Production:
+  - Render (or Vercel) with PostgreSQL
+  - Schema deployed via pnpm db:push
   - Optional: Redis for caching (MVP uses in-memory Map)
 ```
 
-### SQLite → PostgreSQL Migration Path
-
-The schema is defined with Drizzle ORM. To switch:
-1. Change driver in `drizzle.config.ts` and `src/lib/db/client.ts`
-2. Run `pnpm db:migrate` against PostgreSQL
-3. See [02-data-model.md](./02-data-model.md) for full migration details
+The schema is defined in `src/lib/db/schema.ts` using Drizzle ORM with `pg` and `drizzle-orm/pg-core`. Use `getDbUnified()` for all route handlers. See [02-data-model.md](./02-data-model.md) for schema details.

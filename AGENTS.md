@@ -4,7 +4,7 @@
 
 Finnish food diary web app powered by Fineli Open Data. Users log meals via natural language, AI parses food items and maps them to the Fineli database, and the app tracks nutritional intake.
 
-**Stack:** Next.js 16 (App Router), React 19, TypeScript 5, Drizzle ORM (SQLite local / PostgreSQL production), Tailwind CSS 4, TanStack React Query 5, Vitest, pnpm.
+**Stack:** Next.js 16 (App Router), React 19, TypeScript 5, Drizzle ORM (PostgreSQL), Tailwind CSS 4, TanStack React Query 5, Vitest, pnpm.
 
 ## Architecture
 
@@ -19,7 +19,7 @@ src/
     ai/          # AI parsing, ranking, prompts (OpenAI/Anthropic)
     auth/        # Session (jose JWT), magic-link (Resend)
     conversation/ # Conversation engine, parser, resolver, questions
-    db/          # Drizzle client, schema (SQLite + PostgreSQL)
+    db/          # Drizzle client, schema (PostgreSQL)
     export/      # XLSX builder and templates
     fineli/      # Fineli API client, local index, search, nutrients
     hooks/       # React hooks (use-diary, use-chat, use-auth)
@@ -86,8 +86,9 @@ export async function GET(request: NextRequest) {
 
 ## Database
 
-- Use `getDbUnified()` for all route handlers — it works for both SQLite and PostgreSQL.
-- Schema is defined in `src/lib/db/schema.ts` (SQLite) and `src/lib/db/schema.pg.ts` (PostgreSQL).
+- PostgreSQL is the only database backend.
+- Use `getDbUnified()` for all route handlers.
+- Schema is defined in `src/lib/db/schema.ts` (PostgreSQL, using `drizzle-orm/pg-core`).
 - Deploy schema with `pnpm db:push`, not migration files.
 - All tables use soft-delete (`deletedAt` column) — always filter with `isNull(table.deletedAt)`.
 
@@ -126,3 +127,4 @@ export async function GET(request: NextRequest) {
 - Render Blueprint (`render.yaml`): PostgreSQL + Node web service.
 - Build: `pnpm install --prod=false && pnpm db:push && pnpm db:seed && pnpm build`.
 - `pnpm build` runs index builder then `next build`.
+- Local dev requires Docker for PostgreSQL: `docker compose up -d`, then `pnpm db:push`.

@@ -1,23 +1,19 @@
 ---
-description: Database patterns — Drizzle ORM, dual-backend, schema, soft-delete
+description: Database patterns — Drizzle ORM, PostgreSQL, schema, soft-delete
 globs: "src/lib/db/**/*.ts,src/app/api/**/*.ts,drizzle.config.ts"
 alwaysApply: false
 ---
 
 # Database Conventions
 
-## Dual Backend
+## Backend
 
-- SQLite (`better-sqlite3`) for local development, PostgreSQL (`pg`) for production.
-- Use `getDbUnified()` in all route handlers — returns an async API that works for both.
-- Use `getDb()` only in scripts/tests that are SQLite-only (throws on Postgres).
-- Check backend: `isPostgres()` from `@/lib/db/client`.
+- PostgreSQL (`pg`) is the only database backend.
+- Use `getDbUnified()` in all route handlers — returns an async API.
 
 ## Schema
 
-- SQLite schema: `src/lib/db/schema.ts`
-- PostgreSQL schema: `src/lib/db/schema.pg.ts`
-- Both define the same logical tables. Keep them in sync.
+- Schema: `src/lib/db/schema.ts` (PostgreSQL, using `drizzle-orm/pg-core`).
 - Deploy with `pnpm db:push` (drizzle-kit push), not migration files.
 
 ## Query Patterns

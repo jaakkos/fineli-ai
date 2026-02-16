@@ -34,11 +34,11 @@ Codex handles **pure logic** with well-defined inputs/outputs and unit tests. Th
 
 Create the Next.js project with all configuration:
 - `pnpm create next-app` with TypeScript, Tailwind, App Router
-- `drizzle.config.ts` for SQLite
+- `drizzle.config.ts` for PostgreSQL
 - `package.json` with all dependencies
 - `tsconfig.json` strict mode
 - `.env.local.example`
-- `.gitignore` (include `data/*.db`)
+- `.gitignore` (include `data/fineli/` for index)
 - `src/types/index.ts` — shared type definitions
 
 **Output:** A working `pnpm dev` with empty page + all deps installed.
@@ -47,11 +47,11 @@ Create the Next.js project with all configuration:
 
 **Depends on: C1**
 
-- `src/lib/db/schema.ts` — all tables (Drizzle SQLite schema from 02-data-model.md)
-- `src/lib/db/client.ts` — database connection (better-sqlite3)
+- `src/lib/db/schema.ts` — all tables (Drizzle PostgreSQL schema from 02-data-model.md)
+- `src/lib/db/client.ts` — database connection (`pg` + drizzle-orm/node-postgres), use `getDbUnified()`
 - `src/lib/db/seed.ts` — seed script for export_template_versions
 - `src/lib/db/helpers.ts` — `newId()` function using nanoid
-- Run `pnpm db:migrate` to verify schema creates correctly
+- Run `docker compose up -d` then `pnpm db:push` to verify schema creates correctly
 - Test: create a user, diary_day, meal, meal_item programmatically
 
 **Output:** Working database with all tables, seeded template.

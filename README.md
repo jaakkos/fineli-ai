@@ -5,7 +5,7 @@
 
 A Finnish food diary app powered by the [Fineli](https://fineli.fi) food database. Log meals via natural language (e.g. "kaurapuuroa ja maitoa"), get nutrient summaries, and export to Excel.
 
-- **Tech:** Next.js 16, React 19, Drizzle ORM, PostgreSQL (or SQLite for local dev), Tailwind CSS
+- **Tech:** Next.js 16, React 19, Drizzle ORM, PostgreSQL, Tailwind CSS
 - **Privacy:** [Tietosuojaseloste / Privacy Policy](src/app/tietosuoja/page.tsx)
 - **License:** [MIT](LICENSE)
 
@@ -13,7 +13,7 @@ A Finnish food diary app powered by the [Fineli](https://fineli.fi) food databas
 
 - Node.js 20+
 - pnpm (or npm / yarn)
-- PostgreSQL 14+ (for production and optional local dev), or SQLite for local-only
+- Docker (for PostgreSQL)
 
 ## Setup
 
@@ -46,14 +46,13 @@ A Finnish food diary app powered by the [Fineli](https://fineli.fi) food databas
 
 3. **Database**
 
-   - **PostgreSQL (recommended for production):** Create a database and run migrations:
+   Start PostgreSQL via Docker and push the schema:
 
-     ```bash
-     pnpm db:migrate
-     pnpm db:seed
-     ```
-
-   - **SQLite (local dev):** Use `DATABASE_URL=file:./data/fineli.db` and run the same migrate/seed commands.
+   ```bash
+   docker compose up -d
+   pnpm db:push
+   pnpm db:seed
+   ```
 
 4. **Run**
 
@@ -70,8 +69,7 @@ A Finnish food diary app powered by the [Fineli](https://fineli.fi) food databas
 | `pnpm dev`    | Start dev server           |
 | `pnpm build`  | Production build           |
 | `pnpm start`  | Start production server     |
-| `pnpm db:generate` | Generate Drizzle migrations |
-| `pnpm db:migrate` | Apply migrations          |
+| `pnpm db:push` | Push schema to database    |
 | `pnpm db:seed`   | Seed export template       |
 | `pnpm test:run`  | Run unit tests            |
 
@@ -86,15 +84,13 @@ A `render.yaml` in the repo defines a Web Service and a **free PostgreSQL** data
 1. In the Render Dashboard, go to **Blueprints** and create a new Blueprint from this repo.
 2. Render will create the PostgreSQL database and the Web Service, and link `DATABASE_URL` automatically.
 3. Set **SESSION_SECRET** in the Web Service environment (e.g. generate with `openssl rand -hex 32`).
-4. Deploy. The build runs `pnpm db:migrate:pg` and `pnpm db:seed` before `pnpm build`.
-
-**Note:** The app supports both SQLite (default, `DATABASE_URL=file:...`) and PostgreSQL. When `DATABASE_URL` is a `postgres://` URL, the app uses the async PostgreSQL client. Local dev typically uses SQLite; Render uses the free Postgres from the Blueprint.
+4. Deploy. The build runs `pnpm db:push` and `pnpm db:seed` before `pnpm build`.
 
 ### Option B: Manual setup
 
 1. Create a **PostgreSQL** database (Dashboard → New → PostgreSQL). Copy the **Internal Database URL**.
 2. Create a **Web Service**, connect the repo, set:
-   - **Build:** `pnpm install && pnpm db:migrate:pg && pnpm db:seed && pnpm build`
+   - **Build:** `pnpm install && pnpm db:push && pnpm db:seed && pnpm build`
    - **Start:** `pnpm start`
    - **Env:** `SESSION_SECRET` (required), `DATABASE_URL` = the Internal Database URL from step 1.
 
@@ -121,7 +117,6 @@ Without `RESEND_API_KEY`, magic link emails are only logged in development; in p
 - `src/components/` — React UI components
 - `src/lib/` — DB client, auth, Fineli client, conversation engine, AI, utils
 - `src/types/` — Shared TypeScript types
-- `drizzle/` — SQL migrations (PostgreSQL)
 
 ## License
 

@@ -14,8 +14,8 @@ function optional(key: string, fallback: string): string {
 }
 
 export const env = {
-  /** SQLite file path or PostgreSQL connection string */
-  DATABASE_URL: optional('DATABASE_URL', 'file:./data/fineli.db'),
+  /** PostgreSQL connection string */
+  DATABASE_URL: optional('DATABASE_URL', 'postgresql://fineli:fineli@localhost:5432/fineli'),
 
   /** Secret for signing session cookies */
   SESSION_SECRET: required('SESSION_SECRET'),

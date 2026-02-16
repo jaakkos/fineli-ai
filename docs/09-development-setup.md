@@ -5,7 +5,7 @@
 - **Node.js** 20+ (LTS)
 - **pnpm** (preferred) or npm
 - **Git**
-- **Docker** — NOT required for MVP (SQLite is used locally)
+- **Docker** — required for PostgreSQL (local dev)
 
 ---
 
@@ -19,18 +19,17 @@ pnpm install
 # 2. Set up environment
 cp .env.local.example .env.local
 
-# 3. Run migrations (creates SQLite DB automatically)
-pnpm db:migrate
+# 3. Start PostgreSQL (Docker)
+docker compose up -d
 
-# 4. Seed component data
+# 4. Push schema and seed
+pnpm db:push
 pnpm db:seed
 
 # 5. Start dev server
 pnpm dev
 # → http://localhost:3000
 ```
-
-That's it — no Docker, no external database. SQLite file is created at `./data/fineli.db`.
 
 ---
 
@@ -39,9 +38,8 @@ That's it — no Docker, no external database. SQLite file is created at `./data
 `.env.local.example`:
 
 ```bash
-# Database (SQLite for local dev)
-DATABASE_URL=file:./data/fineli.db
-# For PostgreSQL (future): DATABASE_URL=postgresql://fineli:fineli@localhost:5432/fineli_ai
+# Database (PostgreSQL)
+DATABASE_URL=postgresql://fineli:fineli@localhost:5432/fineli_ai
 
 # Auth
 SESSION_SECRET=change-me-to-a-random-string
@@ -57,9 +55,9 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ---
 
-## Docker Compose (PostgreSQL — Optional, for production)
+## Docker Compose (PostgreSQL)
 
-Only needed when moving to PostgreSQL. Not required for local development.
+Required for local development. Run `docker compose up -d` before `pnpm db:push`.
 
 `docker-compose.yml`:
 
@@ -93,9 +91,8 @@ volumes:
 | `@tanstack/react-query` | Server state | 5.x |
 | `exceljs` | xlsx export | 4.x |
 | `drizzle-orm` | Database ORM | latest |
-| `drizzle-kit` | Migrations | latest |
-| `better-sqlite3` | SQLite driver (MVP) | latest |
-| `@types/better-sqlite3` | Types for above | latest |
+| `drizzle-kit` | Schema push & migrations | latest |
+| `pg` | PostgreSQL driver | latest |
 | `nanoid` | ID generation | 5.x |
 | `zod` | Validation | 3.x |
 | `jose` | JWT handling | 5.x |
@@ -103,16 +100,13 @@ volumes:
 
 ---
 
-## Database Migrations
+## Database Schema
 
 Using Drizzle Kit:
 
 ```bash
-# Generate migration from schema changes
-pnpm drizzle-kit generate
-
-# Apply migrations
-pnpm db:migrate
+# Push schema to PostgreSQL (no migration files)
+pnpm db:push
 
 # Studio (visual DB browser)
 pnpm drizzle-kit studio
@@ -173,7 +167,7 @@ pnpm test:e2e      # Run Playwright tests
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "db:migrate": "drizzle-kit push",
+    "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:seed": "tsx src/lib/db/seed.ts",
     "db:studio": "drizzle-kit studio",
@@ -204,7 +198,7 @@ pnpm test:e2e      # Run Playwright tests
 
 ### Week 1: Foundations
 
-1. Project setup (Next.js, Tailwind, SQLite, Drizzle)
+1. Project setup (Next.js, Tailwind, PostgreSQL, Drizzle)
 2. Database schema + migrations
 3. Fineli client with caching
 4. Basic UI layout (date picker, meal tabs, chat panel, items list)
@@ -253,9 +247,6 @@ curl -s "https://fineli.fi/fineli/api/v1/foods/11049" | python3 -m json.tool
 # List all components
 curl -s "https://fineli.fi/fineli/api/v1/components/?lang=fi" | python3 -m json.tool
 
-# SQLite shell (inspect local DB)
-sqlite3 ./data/fineli.db
-
-# Database shell (PostgreSQL, when migrated)
-# docker exec -it fineli-ai-postgres-1 psql -U fineli -d fineli_ai
+# PostgreSQL shell (inspect local DB)
+docker exec -it $(docker compose ps -q postgres) psql -U fineli -d fineli_ai
 ```

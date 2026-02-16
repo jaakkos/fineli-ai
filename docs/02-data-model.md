@@ -1,28 +1,8 @@
 # 02 — Data Model
 
-## Database Strategy: SQLite-First, PostgreSQL-Ready
+## Database Strategy: PostgreSQL-Only
 
-**MVP uses SQLite** for zero-dependency local development (no Docker needed). The schema is designed with Drizzle ORM so switching to PostgreSQL requires only changing the driver import and connection string.
-
-### What changes between SQLite and PostgreSQL
-
-| Feature | SQLite (MVP) | PostgreSQL (future) |
-|---------|-------------|-------------------|
-| Driver | `better-sqlite3` | `pg` / `postgres` |
-| IDs | `text` (nanoid) | `text` (nanoid) — same |
-| Enums | `text` + CHECK constraint | `text` + CHECK (or native ENUM) |
-| JSON | `text` (JSON as string) | `jsonb` |
-| Timestamps | `text` (ISO 8601 string) | `text` (same, Drizzle normalizes) |
-| Partial indexes | Not supported | Supported (nice-to-have) |
-| File | `./data/fineli.db` | Connection URL |
-
-### Migration path
-
-1. Change `drizzle.config.ts`: `dialect: 'sqlite'` → `dialect: 'pg'`
-2. Change `src/lib/db/client.ts`: import from `drizzle-orm/better-sqlite3` → `drizzle-orm/node-postgres`
-3. Change `src/lib/db/schema.ts`: import from `drizzle-orm/sqlite-core` → `drizzle-orm/pg-core`
-4. Run `pnpm db:migrate` to push schema to PostgreSQL
-5. (Optional) migrate data with a one-time script
+**The project uses PostgreSQL** via `pg` and `drizzle-orm/node-postgres`. Schema is defined in `src/lib/db/schema.ts` using `drizzle-orm/pg-core`. Use `getDbUnified()` for all route handlers. Local dev requires Docker: `docker compose up -d` then `pnpm db:push`.
 
 ## Entity Relationship Diagram
 
@@ -40,23 +20,22 @@ users
 
 ---
 
-## Drizzle ORM Schema (SQLite)
+## Drizzle ORM Schema (PostgreSQL)
 
-All IDs are `text` using `nanoid` (21 chars, URL-safe). This works identically on SQLite and PostgreSQL.
+All IDs are `text` using `nanoid` (21 chars, URL-safe). The schema uses `pgTable` and `drizzle-orm/pg-core`.
 
 ### users
 
 ```typescript
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-import { sql } from 'drizzle-orm';
+import { pgTable, text, integer, real, jsonb } from 'drizzle-orm/pg-core';
 
-export const users = sqliteTable('users', {
+export const users = pgTable('users', {
   id:              text('id').primaryKey(), // nanoid
   anonymousId:     text('anonymous_id').unique(),
   email:           text('email').unique(),
   emailVerifiedAt: text('email_verified_at'), // ISO 8601
-  createdAt:       text('created_at').notNull().default(sql`(datetime('now'))`),
-  updatedAt:       text('updated_at').notNull().default(sql`(datetime('now'))`),
+  createdAt:       text('created_at').notNull().defaultNow(),
+  updatedAt:       text('updated_at').notNull().defaultNow(),
   deletedAt:       text('deleted_at'),
 });
 ```
@@ -69,13 +48,13 @@ export const users = sqliteTable('users', {
 ### auth_tokens
 
 ```typescript
-export const authTokens = sqliteTable('auth_tokens', {
+export const authTokens = pgTable('auth_tokens', {
   id:        text('id').primaryKey(), // nanoid
   userId:    text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   token:     text('token').notNull().unique(),
   expiresAt: text('expires_at').notNull(), // ISO 8601
   usedAt:    text('used_at'),
-  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
+  createdAt: text('created_at').notNull().defaultNow(),
 });
 ```
 
@@ -86,12 +65,12 @@ export const authTokens = sqliteTable('auth_tokens', {
 ### diary_days
 
 ```typescript
-export const diaryDays = sqliteTable('diary_days', {
+export const diaryDays = pgTable('diary_days', {
   id:        text('id').primaryKey(), // nanoid
   userId:    text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   date:      text('date').notNull(), // YYYY-MM-DD
-  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
-  updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
+  createdAt: text('created_at').notNull().defaultNow(),
+  updatedAt: text('updated_at').notNull().defaultNow(),
   deletedAt: text('deleted_at'),
 }, (table) => ({
   userDateUnique: unique().on(table.userId, table.date),
@@ -105,15 +84,15 @@ export const diaryDays = sqliteTable('diary_days', {
 ### meals
 
 ```typescript
-export const meals = sqliteTable('meals', {
+export const meals = pgTable('meals', {
   id:         text('id').primaryKey(), // nanoid
   diaryDayId: text('diary_day_id').notNull().references(() => diaryDays.id, { onDelete: 'cascade' }),
   mealType:   text('meal_type', { enum: ['breakfast', 'lunch', 'dinner', 'snack', 'other'] })
                 .notNull().default('other'),
   customName: text('custom_name'),
   sortOrder:  integer('sort_order').notNull().default(0),
-  createdAt:  text('created_at').notNull().default(sql`(datetime('now'))`),
-  updatedAt:  text('updated_at').notNull().default(sql`(datetime('now'))`),
+  createdAt:  text('created_at').notNull().defaultNow(),
+  updatedAt:  text('updated_at').notNull().defaultNow(),
   deletedAt:  text('deleted_at'),
   version:    integer('version').notNull().default(1),
 });
@@ -126,7 +105,7 @@ export const meals = sqliteTable('meals', {
 ### meal_items
 
 ```typescript
-export const mealItems = sqliteTable('meal_items', {
+export const mealItems = pgTable('meal_items', {
   id:               text('id').primaryKey(), // nanoid
   mealId:           text('meal_id').notNull().references(() => meals.id, { onDelete: 'cascade' }),
   userText:         text('user_text'),
@@ -137,50 +116,49 @@ export const mealItems = sqliteTable('meal_items', {
   portionUnitCode:  text('portion_unit_code'),
   portionUnitLabel: text('portion_unit_label'),
   portionGrams:     real('portion_grams').notNull(),
-  nutrientsPer100g: text('nutrients_per_100g', { mode: 'json' }).notNull(), // JSON string
+  nutrientsPer100g: jsonb('nutrients_per_100g').notNull(),
   sortOrder:        integer('sort_order').notNull().default(0),
-  createdAt:        text('created_at').notNull().default(sql`(datetime('now'))`),
-  updatedAt:        text('updated_at').notNull().default(sql`(datetime('now'))`),
+  createdAt:        text('created_at').notNull().defaultNow(),
+  updatedAt:        text('updated_at').notNull().defaultNow(),
   deletedAt:        text('deleted_at'),
 });
 ```
 
 **Notes:**
-- `nutrientsPer100g`: stored as JSON text. Drizzle `{ mode: 'json' }` auto-serializes/deserializes.
-- `real` type for numeric amounts (SQLite doesn't have NUMERIC/DECIMAL).
+- `nutrientsPer100g`: stored as JSONB in PostgreSQL.
 - `fineliFoodId = -1` reserved for custom entries (future).
 
 ### conversation_messages
 
 ```typescript
-export const conversationMessages = sqliteTable('conversation_messages', {
+export const conversationMessages = pgTable('conversation_messages', {
   id:        text('id').primaryKey(), // nanoid
   mealId:    text('meal_id').notNull().references(() => meals.id, { onDelete: 'cascade' }),
   role:      text('role', { enum: ['user', 'assistant', 'system'] }).notNull(),
   content:   text('content').notNull(),
-  metadata:  text('metadata', { mode: 'json' }), // JSON string
-  createdAt: text('created_at').notNull().default(sql`(datetime('now'))`),
+  metadata:  jsonb('metadata'),
+  createdAt: text('created_at').notNull().defaultNow(),
 });
 ```
 
 ### conversation_state
 
 ```typescript
-export const conversationState = sqliteTable('conversation_state', {
+export const conversationState = pgTable('conversation_state', {
   mealId:    text('meal_id').primaryKey().references(() => meals.id, { onDelete: 'cascade' }),
-  stateJson: text('state_json', { mode: 'json' }).notNull(),
-  updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
+  stateJson: jsonb('state_json').notNull(),
+  updatedAt: text('updated_at').notNull().defaultNow(),
 });
 ```
 
 ### export_template_versions
 
 ```typescript
-export const exportTemplateVersions = sqliteTable('export_template_versions', {
+export const exportTemplateVersions = pgTable('export_template_versions', {
   id:         integer('id').primaryKey({ autoIncrement: true }),
   version:    text('version').notNull().unique(),
-  schemaJson: text('schema_json', { mode: 'json' }).notNull(),
-  createdAt:  text('created_at').notNull().default(sql`(datetime('now'))`),
+  schemaJson: jsonb('schema_json').notNull(),
+  createdAt:  text('created_at').notNull().defaultNow(),
 });
 ```
 
@@ -199,7 +177,7 @@ export function newId(): string {
 Why nanoid over UUID:
 - Shorter (21 vs 36 chars)
 - URL-safe by default
-- Works identically on SQLite and PostgreSQL (just a text column)
+- Stored as a text column in PostgreSQL
 - No database extension needed
 
 ---
