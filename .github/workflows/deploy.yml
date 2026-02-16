@@ -69,11 +69,22 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Cache Fineli index
+        id: fineli-cache
+        uses: actions/cache@v4
+        with:
+          path: data/fineli/index.json
+          key: fineli-index-${{ hashFiles('scripts/build-fineli-index.ts') }}
+
+      - name: Build Fineli index
+        if: steps.fineli-cache.outputs.cache-hit != 'true'
+        run: pnpm fineli:index
+
       - name: Push schema to test DB
         run: pnpm db:push
 
-      - name: Build app (includes Fineli index + Next.js)
-        run: pnpm build
+      - name: Build Next.js
+        run: npx next build
 
       - name: Run unit tests
         run: pnpm test:run
