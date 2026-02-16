@@ -9,6 +9,9 @@ on:
 # Render auto-deploys from main via Git integration.
 # This workflow runs checks before Render builds.
 
+permissions:
+  contents: read
+
 env:
   NODE_VERSION: "22"
 
