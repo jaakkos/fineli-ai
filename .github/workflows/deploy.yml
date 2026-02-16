@@ -55,6 +55,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://fineli:fineli@localhost:5432/fineli
       SESSION_SECRET: test-secret-for-ci
+      AI_PROVIDER: none
 
     steps:
       - uses: actions/checkout@v4
@@ -68,11 +69,29 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Build Fineli index
-        run: pnpm fineli:index
-
       - name: Push schema to test DB
         run: pnpm db:push
 
-      - name: Run tests
+      - name: Build app (includes Fineli index + Next.js)
+        run: pnpm build
+
+      - name: Run unit tests
         run: pnpm test:run
+
+      - name: Start server
+        run: pnpm start &
+
+      - name: Wait for server
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/api/auth/anonymous -X POST -o /dev/null 2>/dev/null; then
+              echo "Server ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Server failed to start"
+          exit 1
+
+      - name: Run E2E tests
+        run: pnpm test:e2e

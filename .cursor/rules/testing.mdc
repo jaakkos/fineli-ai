@@ -16,8 +16,9 @@ alwaysApply: false
 ## Running Tests
 
 - `pnpm test:run` — all unit tests
-- `pnpm test:e2e` — E2E tests (requires `pnpm dev` running on port 3000)
+- `pnpm test:e2e` — E2E tests (requires a running server on port 3000)
 - `pnpm lint` — ESLint with zero warnings policy
+- CI runs both unit and E2E tests with `AI_PROVIDER=none` (regex-only, no AI API calls)
 
 ## Patterns
 
