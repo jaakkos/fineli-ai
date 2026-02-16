@@ -68,6 +68,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Build Fineli index
+        run: pnpm fineli:index
+
       - name: Push schema to test DB
         run: pnpm db:push
 

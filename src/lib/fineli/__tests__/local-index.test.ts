@@ -1,5 +1,3 @@
-import { existsSync } from 'fs';
-import { join } from 'path';
 import { describe, it, expect } from 'vitest';
 import {
   localSearch,
@@ -11,9 +9,7 @@ import {
   isDish,
 } from '../local-index';
 
-const hasIndex = existsSync(join(process.cwd(), 'data', 'fineli', 'index.json'));
-
-describe.skipIf(!hasIndex)('Fineli local index', () => {
+describe('Fineli local index', () => {
   describe('localSearch', () => {
     it('finds exact match for "voi"', () => {
       const results = localSearch('voi', 3);
