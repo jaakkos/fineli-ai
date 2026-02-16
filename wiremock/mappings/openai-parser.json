@@ -1,0 +1,20 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.tool_choice.function[?(@.name=='parse_food_message')]"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "openai-parser-response.json",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"]
+  }
+}

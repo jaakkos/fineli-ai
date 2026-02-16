@@ -12,7 +12,7 @@
 
 import type { FineliFood } from '@/types';
 import type { AIProvider } from './types';
-import { getAnthropicApiKey, getOpenAIApiKey, getAIConfig } from './config';
+import { getAnthropicApiKey, getAnthropicBaseUrl, getOpenAIApiKey, getOpenAIBaseUrl, getAIConfig } from './config';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -195,7 +195,7 @@ async function callAnthropicRanking(
   const config = getAIConfig();
   const model = config.parseModel ?? 'claude-sonnet-4-20250514';
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(`${getAnthropicBaseUrl()}/v1/messages`, {
     signal,
     method: 'POST',
     headers: {
@@ -240,7 +240,7 @@ async function callOpenAIRanking(
   const config = getAIConfig();
   const model = config.parseModel ?? 'gpt-4o-mini';
 
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  const res = await fetch(`${getOpenAIBaseUrl()}/v1/chat/completions`, {
     signal,
     method: 'POST',
     headers: {

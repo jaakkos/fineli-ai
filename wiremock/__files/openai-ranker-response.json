@@ -1,0 +1,20 @@
+{
+  "choices": [
+    {
+      "message": {
+        "tool_calls": [
+          {
+            "id": "call_mock_rank",
+            "type": "function",
+            "function": {
+              "name": "rank_search_results",
+              "arguments": "{\"rankings\":[{\"index\":1,\"relevance\":0.95},{\"index\":2,\"relevance\":0.85},{\"index\":3,\"relevance\":0.75},{\"index\":4,\"relevance\":0.65},{\"index\":5,\"relevance\":0.55}]}"
+            }
+          }
+        ]
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {"prompt_tokens": 100, "completion_tokens": 30}
+}

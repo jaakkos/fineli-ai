@@ -1,0 +1,12 @@
+{
+  "choices": [
+    {
+      "message": {
+        "role": "assistant",
+        "content": "Selvä!"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {"prompt_tokens": 100, "completion_tokens": 10}
+}

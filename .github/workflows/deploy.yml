@@ -55,7 +55,9 @@ jobs:
     env:
       DATABASE_URL: postgresql://fineli:fineli@localhost:5432/fineli
       SESSION_SECRET: test-secret-for-ci
-      AI_PROVIDER: none
+      AI_PROVIDER: openai
+      OPENAI_API_KEY: test-key
+      OPENAI_BASE_URL: http://localhost:8080
 
     steps:
       - uses: actions/checkout@v4
@@ -88,6 +90,26 @@ jobs:
 
       - name: Run unit tests
         run: pnpm test:run
+
+      - name: Start WireMock
+        run: |
+          docker run -d --name wiremock \
+            -p 8080:8080 \
+            -v ${{ github.workspace }}/wiremock:/home/wiremock \
+            wiremock/wiremock:latest \
+            --global-response-templating
+
+      - name: Wait for WireMock
+        run: |
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:8080/__admin/mappings -o /dev/null 2>/dev/null; then
+              echo "WireMock ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "WireMock failed to start"
+          exit 1
 
       - name: Start server
         run: pnpm start &

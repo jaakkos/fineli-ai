@@ -11,7 +11,7 @@ import type {
   AIExtractedItem,
 } from './types';
 import type { EngineStepResult } from '@/lib/conversation/engine';
-import { getOpenAIApiKey } from './config';
+import { getOpenAIApiKey, getOpenAIBaseUrl } from './config';
 import {
   buildParserSystemPrompt,
   buildResponderSystemPrompt,
@@ -122,7 +122,7 @@ export class OpenAIProvider implements AIProvider {
     const systemPrompt = buildResponderSystemPrompt(context);
     const userPrompt = this.buildResponsePrompt(engineOutput, context);
 
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch(`${getOpenAIBaseUrl()}/v1/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -192,7 +192,7 @@ export class OpenAIProvider implements AIProvider {
       ...extra,
     };
 
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch(`${getOpenAIBaseUrl()}/v1/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

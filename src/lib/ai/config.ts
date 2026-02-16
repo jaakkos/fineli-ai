@@ -40,3 +40,11 @@ export function getOpenAIApiKey(): string {
   if (!key) throw new Error('OPENAI_API_KEY is required when AI_PROVIDER=openai');
   return key;
 }
+
+export function getOpenAIBaseUrl(): string {
+  return process.env.OPENAI_BASE_URL ?? 'https://api.openai.com';
+}
+
+export function getAnthropicBaseUrl(): string {
+  return process.env.ANTHROPIC_BASE_URL ?? 'https://api.anthropic.com';
+}
