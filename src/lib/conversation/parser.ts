@@ -113,11 +113,15 @@ const ORDINALS: Record<string, number> = {
 };
 
 const PORTION_SIZES: Record<string, string> = {
-  // Human-readable words
-  pieni: 'KPL_S', small: 'KPL_S',
-  keskikokoinen: 'KPL_M', medium: 'KPL_M', normaali: 'KPL_M',
-  iso: 'KPL_L', large: 'KPL_L', suuri: 'KPL_L',
-  // Fineli unit codes (sent by quick-reply buttons)
+  // Human-readable words → prefer portion sizes (PORTS/M/L), fallback to per-piece (KPL)
+  pieni: 'PORTS', small: 'PORTS',
+  keskikokoinen: 'PORTM', medium: 'PORTM', normaali: 'PORTM',
+  iso: 'PORTL', large: 'PORTL', suuri: 'PORTL',
+  // Fineli portion unit codes (sent by quick-reply buttons)
+  ports: 'PORTS',
+  portm: 'PORTM',
+  portl: 'PORTL',
+  // Fineli per-piece unit codes
   kpl_s: 'KPL_S',
   kpl_m: 'KPL_M',
   kpl_l: 'KPL_L',

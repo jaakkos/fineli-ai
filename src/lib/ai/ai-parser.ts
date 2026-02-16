@@ -30,7 +30,7 @@ const SIMPLE_PORTION = /^(?:pieni|keskikokoinen|normaali|iso|suuri|small|medium|
 const SIMPLE_FRACTION = /^(?:puolikas|puoli|half|neljännes|quarter|kolmasosa)$/i;
 const SIMPLE_COUNT = /^\d+(?:[.,]\d+)?\s*(?:kpl|kappaletta?)\s*$/i;
 const SIMPLE_ORDINAL = /^(?:eka|ensimmäinen|toka|toinen|kolmas|neljäs|viides|first|second|third|fourth|fifth)$/i;
-const SIMPLE_REJECT = /^(?:(?:ei\s+)?mikään\s+näistä|none|ei\s+yksikään)$/i;
+const SIMPLE_REJECT = /^(?:(?:ei\s+)?mikään\s+näistä|none|ei\s+yksikään|ohita|skip|ohita\s+tämä|jätä\s+pois)$/i;
 
 // Correction/removal patterns — regex handles these well
 const SIMPLE_CORRECTION = /^(?:ei[,.]?\s*(?:tarkoitin|tarkoitan)|actually|vaihda)\s+/i;

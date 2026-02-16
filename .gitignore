@@ -50,6 +50,11 @@ data/*.db
 data/*.db-wal
 data/*.db-shm
 
+# Fineli data: build script fetches from fineli.fi; generated and raw data not in git
+data/fineli/index.json
+data/fineli/*.csv
+data/fineli/*.zip
+
 # drizzle migration journal
 drizzle/meta
 

@@ -44,10 +44,6 @@ export function generateDisambiguationQuestion(
 // Portion question
 // ---------------------------------------------------------------------------
 
-const KPL_S = 'KPL_S';
-const KPL_M = 'KPL_M';
-const KPL_L = 'KPL_L';
-
 function findUnit(food: FineliFood, code: string) {
   return food.units?.find((u) => u.code === code);
 }
@@ -56,28 +52,53 @@ export function generatePortionQuestion(
   item: ParsedItem,
   food: FineliFood
 ): { message: string; question: PendingQuestion } {
-  const s = findUnit(food, KPL_S);
-  const m = findUnit(food, KPL_M);
-  const l = findUnit(food, KPL_L);
+  // Fineli portion sizes: PORTS (small), PORTM (medium), PORTL (large)
+  const portS = findUnit(food, 'PORTS');
+  const portM = findUnit(food, 'PORTM');
+  const portL = findUnit(food, 'PORTL');
+  // Per-piece sizes: KPL_S, KPL_M, KPL_L (e.g. bread slices, eggs)
+  const kplS = findUnit(food, 'KPL_S');
+  const kplM = findUnit(food, 'KPL_M');
+  const kplL = findUnit(food, 'KPL_L');
+  const dlUnit = findUnit(food, 'DL');
 
-  const dlUnit = food.units?.find((u) => u.code === 'DL');
+  const hasPortion = portS || portM || portL;
+  const hasKpl = kplS || kplM || kplL;
 
   let message: string;
   const options: QuestionOption[] = [];
 
-  if (s || m || l) {
+  if (hasPortion) {
+    // Offer real Fineli portion sizes
     const parts: string[] = [];
-    if (s) {
-      parts.push(`• pieni (${s.massGrams}g)`);
-      options.push({ key: 'KPL_S', label: `Pieni (${s.massGrams}g)`, sublabel: `${s.massGrams}g`, value: s.massGrams });
+    if (portS) {
+      parts.push(`• pieni annos (${portS.massGrams}g)`);
+      options.push({ key: 'PORTS', label: `Pieni annos (${portS.massGrams}g)`, sublabel: `${portS.massGrams}g`, value: portS.massGrams });
     }
-    if (m) {
-      parts.push(`• keskikokoinen (${m.massGrams}g)`);
-      options.push({ key: 'KPL_M', label: `Keskikokoinen (${m.massGrams}g)`, sublabel: `${m.massGrams}g`, value: m.massGrams });
+    if (portM) {
+      parts.push(`• normaali annos (${portM.massGrams}g)`);
+      options.push({ key: 'PORTM', label: `Normaali annos (${portM.massGrams}g)`, sublabel: `${portM.massGrams}g`, value: portM.massGrams });
     }
-    if (l) {
-      parts.push(`• iso (${l.massGrams}g)`);
-      options.push({ key: 'KPL_L', label: `Iso (${l.massGrams}g)`, sublabel: `${l.massGrams}g`, value: l.massGrams });
+    if (portL) {
+      parts.push(`• iso annos (${portL.massGrams}g)`);
+      options.push({ key: 'PORTL', label: `Iso annos (${portL.massGrams}g)`, sublabel: `${portL.massGrams}g`, value: portL.massGrams });
+    }
+    parts.push('• tai grammoina (esim. 120g)');
+    message = `Kuinka paljon: ${food.nameFi}?\n${parts.join('\n')}`;
+  } else if (hasKpl) {
+    // Per-piece sizes (e.g. bread slices)
+    const parts: string[] = [];
+    if (kplS) {
+      parts.push(`• pieni (${kplS.massGrams}g)`);
+      options.push({ key: 'KPL_S', label: `Pieni (${kplS.massGrams}g)`, sublabel: `${kplS.massGrams}g`, value: kplS.massGrams });
+    }
+    if (kplM) {
+      parts.push(`• keskikokoinen (${kplM.massGrams}g)`);
+      options.push({ key: 'KPL_M', label: `Keskikokoinen (${kplM.massGrams}g)`, sublabel: `${kplM.massGrams}g`, value: kplM.massGrams });
+    }
+    if (kplL) {
+      parts.push(`• iso (${kplL.massGrams}g)`);
+      options.push({ key: 'KPL_L', label: `Iso (${kplL.massGrams}g)`, sublabel: `${kplL.massGrams}g`, value: kplL.massGrams });
     }
     parts.push('• tai grammoina (esim. 120g)');
     message = `Kuinka paljon: ${food.nameFi}?\n${parts.join('\n')}`;

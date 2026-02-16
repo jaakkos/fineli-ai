@@ -57,10 +57,10 @@ describe('normalizeQuery', () => {
 
 describe('FOOD_ALIASES', () => {
   it('has Finnish food aliases', () => {
-    expect(FOOD_ALIASES['maito']).toBe('maito');
     expect(FOOD_ALIASES['kevytmaito']).toBe('maito, kevyt');
-    expect(FOOD_ALIASES['puuro']).toBe('kaurapuuro');
+    expect(FOOD_ALIASES['kaurapuuro']).toBe('kaurapuuro');
     expect(FOOD_ALIASES['kahvi']).toBe('kahvi');
+    expect(FOOD_ALIASES['hampurilainen']).toBe('hampurilainen');
   });
 });
 

@@ -116,7 +116,7 @@ async function rankWithAI(
   query: string,
   options: { minRelevance?: number; maxResults?: number; timeoutMs?: number } = {}
 ): Promise<FineliFood[]> {
-  const { minRelevance = 3, maxResults = 5, timeoutMs = 4000 } = options;
+  const { minRelevance = 3, maxResults = 5, timeoutMs = 8000 } = options;
 
   if (results.length <= 1) return results;
 
@@ -159,7 +159,12 @@ async function rankWithAI(
 
     return relevant.slice(0, maxResults).map((r) => candidates[r.index]);
   } catch (error) {
-    console.warn('[AI Ranker] Failed, using heuristic fallback:', error);
+    const isTimeout = error instanceof DOMException && error.name === 'AbortError';
+    if (isTimeout) {
+      console.warn('[AI Ranker] Timeout, using heuristic fallback');
+    } else {
+      console.warn('[AI Ranker] Failed, using heuristic fallback:', error);
+    }
     return results.slice(0, maxResults);
   }
 }
@@ -246,11 +251,11 @@ async function callOpenAIRanking(
       model,
       max_tokens: 300,
       messages: [
-        { role: 'system', content: 'Olet hakutulosten relevanssin arvioija.' },
+        { role: 'system', content: 'Olet hakutulosten relevanssin arvioija. Käytä AINA rank_search_results-työkalua.' },
         { role: 'user', content: prompt },
       ],
-      functions: [RANK_FUNCTION_OPENAI],
-      function_call: { name: 'rank_search_results' },
+      tools: [{ type: 'function', function: RANK_FUNCTION_OPENAI }],
+      tool_choice: { type: 'function', function: { name: 'rank_search_results' } },
     }),
   });
 
@@ -259,11 +264,11 @@ async function callOpenAIRanking(
   }
 
   const data = await res.json();
-  const fnCall = data.choices?.[0]?.message?.function_call;
+  const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
 
-  if (!fnCall?.arguments) return [];
+  if (!toolCall?.function?.arguments) return [];
 
-  const parsed = JSON.parse(fnCall.arguments);
+  const parsed = JSON.parse(toolCall.function.arguments);
   if (!Array.isArray(parsed.rankings)) return [];
 
   return parsed.rankings.map((r: { index: number; relevance: number }) => ({

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getSession } from '@/lib/auth/session';
-import { fineliClient } from '@/lib/fineli/singleton';
+import { searchFoods } from '@/lib/fineli/local-index';
 import { rankSearchResults } from '@/lib/fineli/search';
 import { handleRouteError } from '@/lib/utils/api-error';
 
@@ -39,26 +39,11 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const { q, lang } = parsed.data;
+  const { q } = parsed.data;
 
-  try {
-    const results = await fineliClient.searchFoods(q, lang);
-    const ranked = rankSearchResults(results, q);
-    return NextResponse.json({ data: ranked });
-  } catch (err) {
-    console.error('[Fineli search]', err);
-    return NextResponse.json(
-      {
-        error: {
-          code: 'FINELI_ERROR',
-          message: process.env.NODE_ENV === 'development' && err instanceof Error
-            ? err.message
-            : 'Haku epäonnistui. Yritä uudelleen.',
-        },
-      },
-      { status: 502 }
-    );
-  }
+  const results = searchFoods(q);
+  const ranked = rankSearchResults(results, q);
+  return NextResponse.json({ data: ranked });
   } catch (error) {
     return handleRouteError(error);
   }

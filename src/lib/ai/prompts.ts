@@ -67,6 +67,12 @@ SÄÄNNÖT:
      * Adessiivi (= "kanssa"): maidolla → maito, voilla → voi, hillolla → hillo, kermalla → kerma
      * Elatiivi: maidosta → maito, sokerista → sokeri
    - Anna searchHint AINA kun tiedät paremman Fineli-hakutermin (esim. "maidolla" → searchHint: "maito", "kaurapuuroa" → searchHint: "kaurapuuro")
+   - SÄILYTÄ tuotemerkit ja tarkenteet searchHintissä kun käyttäjä mainitsee ne!
+     * "ruisleipä fazer" → searchHint: "ruisleipä fazer" (EI pelkkä "ruisleipä")
+     * "vaasan ruispalat" → searchHint: "ruisleipä vaasan"
+     * "oululainen reissumies" → searchHint: "ruisleipä reissumies oululainen fazer"
+     * "edam juusto" → searchHint: "juusto, edam"
+     * Jos käyttäjä EI mainitse merkkiä, käytä yleistä: "leipä" → "ruisleipä"
    - Arvioi annoskoko grammoina jos käyttäjä käyttää arkikieltä ("kuppi", "lautasellinen", "normaali annos")
 
 3. YHDISTELMÄRUOAT — pura AINA osiin:
@@ -74,6 +80,11 @@ SÄÄNNÖT:
    - "voileipä" / "leipä" = aina leipäviipale + voi + mainitut täytteet
    - "söin voileivän kinkulla ja juustolla" = 4 itemiä:
      leipä (searchHint: "ruisleipä", portionEstimateGrams: 35)
+     voi (searchHint: "voi", portionEstimateGrams: 5)
+     kinkku (searchHint: "kinkku, keittokinkku", portionEstimateGrams: 15)
+     juusto (searchHint: "juusto, edam", portionEstimateGrams: 20)
+   - "ruisleipää fazer kinkulla ja juustolla" = 4 itemiä:
+     leipä (searchHint: "ruisleipä fazer", portionEstimateGrams: 35)  ← merkki säilytetään!
      voi (searchHint: "voi", portionEstimateGrams: 5)
      kinkku (searchHint: "kinkku, keittokinkku", portionEstimateGrams: 15)
      juusto (searchHint: "juusto, edam", portionEstimateGrams: 20)
@@ -167,6 +178,8 @@ SÄÄNNÖT:
      * maito → "maito, kevyt"
      * leipä → "ruisleipä" (yleisin suomalainen leipä)
      * voi → "voi"
+   - TÄRKEÄ: Jos käyttäjä mainitsee tuotemerkin (Fazer, Vaasan, Oululainen jne.),
+     sisällytä se AINA searchHintiin! "ruisleipä fazer" → searchHint: "ruisleipä fazer"
 
 6. Vastaukset odottaviin kysymyksiin:
    - Numerovastaus (1, 2, 3) = valinta listasta (1-pohjainen)
@@ -174,6 +187,7 @@ SÄÄNNÖT:
    - Tilavuus (2 dl, 100 ml) = tilavuusannos
    - Koko (pieni, normaali, iso) = Fineli-yksikkökoko
    - Kyllä/ei (joo, kyllä, ei, en) = kyllä/ei-vastaus
+   - Ohita/skip (ohita, skip, ohita tämä, jätä pois, ei mikään näistä) = hylkää/ohita valinta
 
 7. Confidence:
    - 0.9+ = erittäin varma
@@ -254,7 +268,7 @@ export const PARSE_TOOL_ANTHROPIC = {
             searchHint: {
               type: 'string',
               description:
-                'Fineli-hakutermi — anna AINA, valitse yleisin vaihtoehto (esim. "juusto" → "juusto, edam", "kinkku" → "kinkku, keittokinkku", "leipä" → "ruisleipä")',
+                'Fineli-hakutermi — anna AINA. Valitse yleisin vaihtoehto (esim. "juusto" → "juusto, edam", "leipä" → "ruisleipä"). SÄILYTÄ tuotemerkit: "ruisleipä fazer" → "ruisleipä fazer", "vaasan ruispalat" → "ruisleipä vaasan".',
             },
             portionEstimateGrams: {
               type: 'number',

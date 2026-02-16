@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/session';
-import { fineliClient } from '@/lib/fineli/singleton';
+import { getFoodDetails } from '@/lib/fineli/local-index';
 import { handleRouteError } from '@/lib/utils/api-error';
 
 export async function GET(
@@ -30,7 +30,19 @@ export async function GET(
     );
   }
 
-  const food = await fineliClient.getFood(foodId);
+  const food = getFoodDetails(foodId);
+  if (!food) {
+    return NextResponse.json(
+      {
+        error: {
+          code: 'NOT_FOUND',
+          message: `Food ${foodId} not found`,
+        },
+      },
+      { status: 404 }
+    );
+  }
+
   return NextResponse.json({ data: food });
   } catch (error) {
     return handleRouteError(error);

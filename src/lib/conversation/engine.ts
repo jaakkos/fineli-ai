@@ -144,14 +144,23 @@ function resolvePortionGrams(
   }
 
   if (answer.type === 'portion_size') {
-    const unit = units.find((u) => u.code === answer.key);
-    if (unit) {
-      return {
-        grams: unit.massGrams,
-        unitCode: unit.code,
-        unitLabel: unit.labelFi,
-        amount: 1,
-      };
+    // Try exact code first, then equivalent (PORTS↔KPL_S, PORTM↔KPL_M, PORTL↔KPL_L)
+    const equivalents: Record<string, string[]> = {
+      PORTS: ['PORTS', 'KPL_S'], KPL_S: ['KPL_S', 'PORTS'],
+      PORTM: ['PORTM', 'KPL_M'], KPL_M: ['KPL_M', 'PORTM'],
+      PORTL: ['PORTL', 'KPL_L'], KPL_L: ['KPL_L', 'PORTL'],
+    };
+    const codesToTry = equivalents[answer.key] ?? [answer.key];
+    for (const code of codesToTry) {
+      const unit = units.find((u) => u.code === code);
+      if (unit) {
+        return {
+          grams: unit.massGrams,
+          unitCode: unit.code,
+          unitLabel: unit.labelFi,
+          amount: 1,
+        };
+      }
     }
     return null;
   }

@@ -5,23 +5,29 @@ import Button from '@/components/ui/Button';
 
 interface ExportButtonProps {
   defaultDate: string;
+  /** Earliest diary entry date (from API) — used as default "from" */
+  entryMinDate?: string | null;
+  /** Latest diary entry date (from API) — used as default "to" */
+  entryMaxDate?: string | null;
   onExport: (from: string, to: string) => Promise<void>;
   isExporting: boolean;
 }
 
 export default function ExportButton({
   defaultDate,
+  entryMinDate,
+  entryMaxDate,
   onExport,
   isExporting,
 }: ExportButtonProps) {
   const [showRange, setShowRange] = useState(false);
-  const [fromDate, setFromDate] = useState(defaultDate);
-  const [toDate, setToDate] = useState(defaultDate);
+  const [fromDate, setFromDate] = useState(entryMinDate ?? defaultDate);
+  const [toDate, setToDate] = useState(entryMaxDate ?? defaultDate);
 
   useEffect(() => {
-    setFromDate(defaultDate);
-    setToDate(defaultDate);
-  }, [defaultDate]);
+    setFromDate(entryMinDate ?? defaultDate);
+    setToDate(entryMaxDate ?? defaultDate);
+  }, [defaultDate, entryMinDate, entryMaxDate]);
 
   const handleExport = async () => {
     await onExport(fromDate, toDate);

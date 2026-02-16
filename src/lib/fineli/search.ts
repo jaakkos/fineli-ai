@@ -1,4 +1,5 @@
 import type { FineliFood } from '@/types';
+import { getMediumPortion } from './local-index';
 
 export function normalizeQuery(input: string): string {
   return input
@@ -8,139 +9,130 @@ export function normalizeQuery(input: string): string {
     .replace(/\s+/g, ' ');
 }
 
+/**
+ * Common Finnish food name aliases → Fineli search-friendly terms.
+ * Maps colloquial names to the naming convention used in Fineli data.
+ */
 export const FOOD_ALIASES: Record<string, string> = {
   // Dairy
-  maito: 'maito',
-  kevytmaito: 'maito, kevyt',
+  'kevytmaito': 'maito, kevyt',
   'rasvaton maito': 'maito, rasvaton',
-  täysmaito: 'maito, täysi',
-  'ykkösmaito': 'maito, kevyt',
-  piimä: 'piimä',
-  kerma: 'kerma',
-  jogurtti: 'jogurtti',
-  rahka: 'rahka',
-  // Grains
-  puuro: 'kaurapuuro',
-  riisipuuro: 'riisipuuro',
-  leipä: 'leipä',
-  ruisleipä: 'ruisleipä',
-  paahtoleipä: 'paahtoleipä',
-  sämpylä: 'sämpylä',
-  // Spreads & cheese
-  voi: 'voi',
-  margariini: 'margariini',
-  juusto: 'juusto',
+  'täysmaito': 'maito, täysi',
+  'piimä': 'piimä',
+  'kerma': 'kerma',
+  'jogurtti': 'jogurtti',
+  'rahka': 'rahka',
+  'viili': 'viili',
+
+  // Grains & bread
+  'ruisleipä': 'ruisleipä',
+  'sekaleipä': 'ruisleipä, ruissekaleipä',
+  'paahtoleipä': 'paahtoleipä',
+  'näkkileipä': 'näkkileipä',
+  'kauraleipä': 'kauraleipä',
+  'graham': 'sämpylä, graham',
+  'sämpylä': 'sämpylä',
+  'leipä': 'leipä',
+  'pasta': 'pasta',
+  'riisi': 'riisi',
+  'puuro': 'puuro',
+  'kaurapuuro': 'kaurapuuro',
+
+  // Spreads & toppings
+  'voi': 'voi',
+  'margariini': 'margariini',
+  'levite': 'levite',
+  'juusto': 'juusto',
+  'kinkku': 'kinkku',
+  'leikkele': 'leikkele',
+
+  // Cheese varieties
   'edam': 'juusto, edam',
   'emmental': 'juusto, emmental',
-  // Meat & deli
-  kinkku: 'kinkku, keittokinkku',
-  keittokinkku: 'kinkku, keittokinkku',
-  kalkkuna: 'kalkkunaleikkele',
-  meetvursti: 'meetvursti',
-  // Prepared dishes — common Fineli naming
+  'kermajuusto': 'juusto, kerma',
+  'tuorejuusto': 'tuorejuusto',
+
+  // Meat & protein
+  'kana': 'kana',
+  'broileri': 'broileri',
+  'porsas': 'porsaanliha',
+  'nauta': 'naudanliha',
+  'jauheliha': 'jauheliha',
+  'kala': 'kala',
+  'lohi': 'lohi',
+  'kirjolohi': 'kirjolohi',
+  'tonnikala': 'tonnikala',
+  'kananmuna': 'kananmuna',
+  'muna': 'kananmuna',
+
+  // Prepared dishes
   'kana curry': 'curry, kananliha',
-  'kanacurry': 'curry, kananliha',
-  'chicken curry': 'curry, kananliha',
-  'nakkikeitto': 'nakkikeitto',
-  'hernekeitto': 'hernekeitto',
+  'kanacurry': 'kanacurry',
   'lihakeitto': 'lihakeitto',
+  'jauhelihakeitto': 'jauhelihakeitto',
+  'hernekeitto': 'hernekeitto',
   'kalakeitto': 'kalakeitto',
-  'pinaattikeitto': 'pinaattikeitto',
+  'lohikeitto': 'lohikeitto',
   'hampurilainen': 'hampurilainen',
-  'juustohampurilainen': 'hampurilainen, juusto',
   'pizza': 'pizza',
   'kebab': 'kebab',
   'makaronilaatikko': 'makaronilaatikko',
   'lasagne': 'lasagne',
-  'lihapiirakka': 'lihapiirakka',
-  'karjalanpiirakka': 'karjalanpiirakka',
-  'karjalanpaisti': 'karjalanpaisti',
-  'kaalilaatikko': 'kaalilaatikko',
-  'maksalaatikko': 'maksalaatikko',
-  // Fruits & basics
-  omena: 'omena',
-  banaani: 'banaani',
-  kahvi: 'kahvi',
-  tee: 'tee',
-  mehu: 'mehu',
+  'pinaattikeitto': 'pinaattikeitto',
+  'perunasose': 'perunasose',
+  'perunamuusi': 'perunasose',
+  'pannukakku': 'pannukakku',
+  'lettu': 'lettu',
+  'lihapullat': 'lihapulla',
+  'lihapulla': 'lihapulla',
+
+  // Vegetables & fruits
+  'peruna': 'peruna',
+  'tomaatti': 'tomaatti',
+  'kurkku': 'kurkku',
+  'salaatti': 'salaatti',
+  'porkkana': 'porkkana',
+  'omena': 'omena',
+  'banaani': 'banaani',
+  'appelsiini': 'appelsiini',
+
+  // Beverages
+  'kahvi': 'kahvi',
+  'tee': 'tee',
+  'mehu': 'mehu',
+  'olut': 'olut',
+  'viini': 'viini',
 };
 
-/**
- * Score how well a Fineli result matches the user's query.
- *
- * Key insight: the user searching for "maito" wants *milk*, not
- * "Näkkileipä, sisältää maitoa" (crispbread containing milk).
- *
- * Scoring strategy:
- *   - Exact match on primary name              → 100
- *   - Name starts with query                   → 60
- *   - First word(s) before comma match query   → 50
- *   - Query matches a significant word in name → 20
- *   - Query only in a parenthetical/descriptor → 5  (penalized)
- *   - FOOD type bonus                          → 10
- *   - Short name bonus (likely a base food)    → 0-8
- */
-function scoreResult(food: FineliFood, normalizedQuery: string): number {
+// ---------------------------------------------------------------------------
+// Scoring helpers for ranking Fineli search results
+// ---------------------------------------------------------------------------
+
+function scoreResult(food: FineliFood, query: string): number {
+  const name = food.nameFi.toLowerCase();
+  const primary = name.split(',')[0].trim();
+  const qWords = query.split(/\s+/);
+
   let score = 0;
-  const nameFi = food.nameFi.toLowerCase();
-  const queryWords = normalizedQuery.split(/\s+/);
 
-  // Exact match
-  if (nameFi === normalizedQuery) {
-    score += 100;
-  }
-  // Name starts with query (e.g., "maito, kevyt" starts with "maito")
-  else if (nameFi.startsWith(normalizedQuery + ',') || nameFi.startsWith(normalizedQuery + ' ')) {
-    score += 60;
-  }
-  // Primary part before comma matches (e.g., "Kaurapuuro, vedellä" → "kaurapuuro")
-  else if (nameFi.includes(',')) {
-    const primary = nameFi.split(',')[0].trim();
-    if (primary === normalizedQuery) {
-      score += 55;
-    } else if (primary.startsWith(normalizedQuery)) {
-      score += 45;
-    } else if (primary.includes(normalizedQuery)) {
-      score += 30;
-    }
-  }
-  // Name starts with query (no comma case)
-  else if (nameFi.startsWith(normalizedQuery)) {
-    score += 50;
+  if (name === query) score = 100;
+  else if (primary === query) score = 90;
+  else if (primary.startsWith(query)) score += 60;
+  else if (name.startsWith(query)) score += 50;
+  else if (primary.includes(query)) score += 35;
+  else if (name.includes(query)) score += 20;
+
+  if (qWords.length > 1) {
+    const matchCount = qWords.filter((w) => name.includes(w)).length;
+    score += matchCount * 8;
   }
 
-  // Check if query appears only as a secondary descriptor — strong penalty
-  // Patterns like "sisältää X", "sis. X", "kanssa X", "sisältävä X"
-  const secondaryPatterns = [
-    /\bsis(?:\.|ältää|ältävä)\b/i,
-    /\bkanssa\b/i,
-    /\bmaku(?:inen|a)?\b/i,
-  ];
-  const isSecondary = secondaryPatterns.some((p) => p.test(nameFi)) &&
-    !nameFi.startsWith(normalizedQuery);
-  if (isSecondary && score < 30) {
-    // This result mentions the query but isn't primarily about it
-    score = Math.min(score, 5);
-  }
-
-  // If we still haven't scored, check basic inclusion
-  if (score === 0) {
-    if (nameFi.includes(normalizedQuery)) {
-      score += 15;
-    } else {
-      // Check individual query words
-      const matchCount = queryWords.filter((w) => nameFi.includes(w)).length;
-      score += matchCount * 5;
-    }
-  }
-
-  // FOOD type bonus (prefer plain foods over prepared dishes)
+  // Prefer raw ingredients (FOOD) over composite dishes (DISH) for general queries
   if (food.type === 'FOOD') score += 10;
 
-  // Short name bonus — "Maito, kevyt" is more likely what user wants than
-  // "Kastikejauhe, maitorahkateema, erikoishieno, erikoisvoimakas"
-  if (nameFi.length < 30) score += 8;
-  else if (nameFi.length < 50) score += 4;
+  // Prefer shorter names (more specific foods)
+  if (name.length < 40) score += 3;
+  if (name.length < 25) score += 2;
 
   return score;
 }
@@ -164,12 +156,20 @@ export function rankSearchResults(
 
   scored.sort((a, b) => b.score - a.score);
 
-  // Filter out very low-relevance results (score <= 10 means only incidental mention)
   const minScore = 10;
   const filtered = scored.filter((s) => s.score > minScore);
-
-  // If filtering removed everything, keep at least the top result
   const finalList = filtered.length > 0 ? filtered : scored.slice(0, 1);
 
   return finalList.slice(0, limit).map(({ food }) => food);
+}
+
+/**
+ * Get the real Fineli medium portion size for a food, if available.
+ */
+export function getRealPortionGrams(foodId: number): number | null {
+  try {
+    return getMediumPortion(foodId);
+  } catch {
+    return null;
+  }
 }

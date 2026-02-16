@@ -229,15 +229,15 @@ describe('parseAnswer', () => {
     });
 
     it('parses portion size "pieni"', () => {
-      expect(parseAnswer('pieni', 'portion')).toEqual({ type: 'portion_size', key: 'KPL_S' });
+      expect(parseAnswer('pieni', 'portion')).toEqual({ type: 'portion_size', key: 'PORTS' });
     });
 
     it('parses portion size "keskikokoinen"', () => {
-      expect(parseAnswer('keskikokoinen', 'portion')).toEqual({ type: 'portion_size', key: 'KPL_M' });
+      expect(parseAnswer('keskikokoinen', 'portion')).toEqual({ type: 'portion_size', key: 'PORTM' });
     });
 
     it('parses portion size "iso"', () => {
-      expect(parseAnswer('iso', 'portion')).toEqual({ type: 'portion_size', key: 'KPL_L' });
+      expect(parseAnswer('iso', 'portion')).toEqual({ type: 'portion_size', key: 'PORTL' });
     });
 
     it('parses fraction "puolikas"', () => {

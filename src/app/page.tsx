@@ -73,6 +73,7 @@ function HomeContent() {
   const [magicLinkEmailSent, setMagicLinkEmailSent] = useState(false);
   const [magicLinkEmail, setMagicLinkEmail] = useState('');
   const [exportError, setExportError] = useState<string | null>(null);
+  const [entryDateRange, setEntryDateRange] = useState<{ minDate: string | null; maxDate: string | null }>({ minDate: null, maxDate: null });
   const [shortcutsHelpOpen, setShortcutsHelpOpen] = useState(false);
   const { account, createAnonymousSession, sendMagicLink, logout, deleteAccount } = useAuth();
   const { data: dayData, isLoading: diaryLoading, error: diaryError } = useDiaryDay(date);
@@ -141,6 +142,20 @@ function HomeContent() {
   useEffect(() => {
     if (urlDate) setDate(urlDate);
   }, [urlDate]);
+
+  // Fetch the user's diary entry date range for export defaults
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/diary/date-range')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data) {
+          setEntryDateRange({ minDate: data.minDate, maxDate: data.maxDate });
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [dayData]); // refetch when diary data changes (user may have added entries)
 
   // Auto-expand foods list when items are added
   useEffect(() => {
@@ -512,6 +527,8 @@ function HomeContent() {
             <DatePicker value={date} onChange={handleDateChange} />
             <ExportButton
               defaultDate={date}
+              entryMinDate={entryDateRange.minDate}
+              entryMaxDate={entryDateRange.maxDate}
               onExport={handleExport}
               isExporting={isExporting}
             />
