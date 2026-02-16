@@ -1,0 +1,47 @@
+---
+description: Database patterns — Drizzle ORM, dual-backend, schema, soft-delete
+globs: "src/lib/db/**/*.ts,src/app/api/**/*.ts,drizzle.config.ts"
+alwaysApply: false
+---
+
+# Database Conventions
+
+## Dual Backend
+
+- SQLite (`better-sqlite3`) for local development, PostgreSQL (`pg`) for production.
+- Use `getDbUnified()` in all route handlers — returns an async API that works for both.
+- Use `getDb()` only in scripts/tests that are SQLite-only (throws on Postgres).
+- Check backend: `isPostgres()` from `@/lib/db/client`.
+
+## Schema
+
+- SQLite schema: `src/lib/db/schema.ts`
+- PostgreSQL schema: `src/lib/db/schema.pg.ts`
+- Both define the same logical tables. Keep them in sync.
+- Deploy with `pnpm db:push` (drizzle-kit push), not migration files.
+
+## Query Patterns
+
+```typescript
+const db = await getDbUnified();
+const raw = db.raw;
+const s = db.schema;
+
+const rows = await db.selectAll(
+  raw.select().from(s.diaryDays).where(
+    and(
+      eq(s.diaryDays.userId, session.userId),
+      isNull(s.diaryDays.deletedAt)
+    )
+  )
+);
+```
+
+## Soft-Delete
+
+All main tables have a `deletedAt` column. **Always** filter with `isNull(table.deletedAt)` in queries. Never hard-delete rows — set `deletedAt` to current timestamp instead.
+
+## IDs
+
+- Primary keys are text UUIDs generated with `nanoid` (from `@/types`).
+- Use `newId()` to generate new IDs.

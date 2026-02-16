@@ -1,0 +1,45 @@
+---
+description: API route conventions — auth, validation, error handling, response shape
+globs: src/app/api/**/*.ts
+alwaysApply: false
+---
+
+# API Route Conventions
+
+## Standard Structure
+
+Every route handler follows this pattern:
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { getSession } from '@/lib/auth/session';
+import { handleRouteError } from '@/lib/utils/api-error';
+
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json(
+        { error: { code: 'UNAUTHORIZED', message: 'Not authenticated' } },
+        { status: 401 }
+      );
+    }
+
+    // 1. Parse & validate input with Zod
+    // 2. Business logic via getDbUnified()
+    // 3. Return success response
+    return NextResponse.json({ data: result });
+  } catch (error) {
+    return handleRouteError(error);
+  }
+}
+```
+
+## Rules
+
+- Always check `getSession()` first — return 401 if null.
+- Validate all input with Zod. Return `VALIDATION_ERROR` (400) with `error.flatten()` on failure.
+- Use `getDbUnified()` for database access — works for both SQLite and PostgreSQL.
+- Wrap everything in try/catch with `handleRouteError(error)`.
+- Error codes: `UNAUTHORIZED`, `FORBIDDEN`, `NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`.
+- Response shape: `{ error: { code, message, details? } }` for errors.

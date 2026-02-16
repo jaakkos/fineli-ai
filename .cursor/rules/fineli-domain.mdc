@@ -1,0 +1,40 @@
+---
+description: Fineli food data domain — search, portions, AI parsing, Finnish food terms
+globs: "src/lib/fineli/**/*.ts,src/lib/ai/**/*.ts,src/lib/conversation/**/*.ts"
+alwaysApply: false
+---
+
+# Fineli Domain Knowledge
+
+## Data Source
+
+- Fineli Open Data from THL (Finnish Institute for Health and Welfare), CC-BY 4.0.
+- Local index built at build time from CSV: `scripts/build-fineli-index.ts` → `data/fineli/index.json`.
+- CSVs are Latin-1 encoded with `;` delimiters — always parse with `latin1` encoding.
+
+## Search
+
+- FlexSearch with `tokenize: 'forward'` (prefix matching) for local food search.
+- Two indexes: `FOOD` and `DISH` — searched in parallel.
+- `scoreMatch()` ranks results by exact, primary, compound, contains, and word matches.
+- Compound words matter in Finnish: "kana curry" should match "kanacurry".
+- `FOOD_ALIASES` maps common Finnish names to Fineli-friendly terms.
+
+## AI Pipeline
+
+1. **Parser** (`ai-parser.ts`): Natural language → structured food items with `searchHint` and `portionEstimateGrams`.
+2. **Ranker** (`ai-ranker.ts`): Reranks search results by relevance to user intent.
+3. **Conversation engine** (`conversation/engine.ts`): Manages state, follow-up questions, disambiguation.
+4. **Prompts** (`prompts.ts`): System prompts in Finnish. Brand names must be preserved in `searchHint`.
+
+## Portion Sizes
+
+Fineli unit codes for portions:
+- `PORTS` / `PORTM` / `PORTL` — small / medium / large portion
+- `KPL_S` / `KPL_M` / `KPL_L` — small / medium / large piece
+- `DL` — deciliter, `G` — gram
+- Equivalents: `PORTS` ↔ `KPL_S`, `PORTM` ↔ `KPL_M`, `PORTL` ↔ `KPL_L`
+
+## Skip Commands
+
+Users can skip foods with: "ohita", "skip", "ohita tämä", "jätä pois". These are handled by `SIMPLE_REJECT` regex in `ai-parser.ts` before reaching the AI.

@@ -1,0 +1,28 @@
+---
+description: React component and hook patterns — client components, props, data fetching
+globs: "src/components/**/*.tsx,src/app/**/*.tsx,src/lib/hooks/**/*.ts"
+alwaysApply: false
+---
+
+# React Component Patterns
+
+## Components
+
+- Add `'use client'` only when the component uses hooks or browser APIs.
+- Define props interface above the component: `interface XxxProps { ... }`.
+- Feature components go in `components/diary/`, generic primitives in `components/ui/`.
+- Style with Tailwind utility classes inline — no CSS modules or styled-components.
+- Use `export default function ComponentName()` for page-level and feature components.
+
+## Hooks
+
+- All data fetching uses TanStack React Query.
+- Query keys: `['resource', 'sub', id]` — e.g. `['diary', 'day', date]`.
+- Custom hooks in `src/lib/hooks/` — named `use-xxx.ts`.
+- Optimistic updates: implement `onMutate` (save snapshot, apply optimistic state), `onError` (rollback), `onSettled` (invalidate queries).
+
+## State
+
+- Prefer React Query cache over local state for server data.
+- Use `useState` for UI-only state (modals, selections, form inputs).
+- Use `useCallback` and `useMemo` for expensive computations and stable references.

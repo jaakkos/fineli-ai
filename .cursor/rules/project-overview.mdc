@@ -1,0 +1,25 @@
+---
+description: Core project context — stack, structure, and conventions for fineli-ai
+alwaysApply: true
+---
+
+# Fineli-AI Project Context
+
+Finnish food diary app. Users log meals in natural language (Finnish), AI maps them to Fineli Open Data, app tracks nutrition.
+
+## Stack
+
+- Next.js 16 App Router, React 19, TypeScript 5 (strict)
+- Drizzle ORM — SQLite (local dev) / PostgreSQL (production)
+- Tailwind CSS 4, TanStack React Query 5
+- Vitest (unit), Playwright (E2E), pnpm
+
+## Key Conventions
+
+- **Imports**: Always use `@/` alias for `src/`. Never relative cross-module paths.
+- **Naming**: PascalCase components, camelCase functions, UPPER_SNAKE constants.
+- **Errors**: `{ error: { code, message, details? } }` shape. Use `handleRouteError()`.
+- **Validation**: Zod schemas. `safeParse()` → return 400 on failure.
+- **Soft-delete**: All tables use `deletedAt`. Always filter `isNull(table.deletedAt)`.
+- **UI language**: Finnish. All user-facing text and AI prompts are in Finnish.
+- **Lint**: Zero warnings policy (`eslint --max-warnings 0`).

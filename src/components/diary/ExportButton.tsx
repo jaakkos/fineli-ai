@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Button from '@/components/ui/Button';
 
 interface ExportButtonProps {
@@ -21,13 +21,14 @@ export default function ExportButton({
   isExporting,
 }: ExportButtonProps) {
   const [showRange, setShowRange] = useState(false);
-  const [fromDate, setFromDate] = useState(entryMinDate ?? defaultDate);
-  const [toDate, setToDate] = useState(entryMaxDate ?? defaultDate);
+  const [fromDate, setFromDate] = useState(defaultDate);
+  const [toDate, setToDate] = useState(defaultDate);
 
-  useEffect(() => {
+  const handleOpen = () => {
     setFromDate(entryMinDate ?? defaultDate);
     setToDate(entryMaxDate ?? defaultDate);
-  }, [defaultDate, entryMinDate, entryMaxDate]);
+    setShowRange(true);
+  };
 
   const handleExport = async () => {
     await onExport(fromDate, toDate);
@@ -40,7 +41,7 @@ export default function ExportButton({
         variant="secondary"
         size="sm"
         loading={isExporting}
-        onClick={() => setShowRange(!showRange)}
+        onClick={() => (showRange ? setShowRange(false) : handleOpen())}
         aria-label="Vie Excel-tiedostona"
         aria-expanded={showRange}
       >

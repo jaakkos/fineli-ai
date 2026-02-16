@@ -1,0 +1,43 @@
+---
+description: Testing conventions — Vitest, colocated tests, E2E patterns
+globs: "src/**/*.test.ts,src/__tests__/**/*.ts,vitest.config.ts"
+alwaysApply: false
+---
+
+# Testing Conventions
+
+## Structure
+
+- **Unit tests**: Colocated in `__tests__/` directories next to source code.
+  - Example: `src/lib/fineli/__tests__/search.test.ts` tests `src/lib/fineli/search.ts`.
+- **E2E tests**: `src/__tests__/` with helpers in `src/__tests__/helpers/`.
+- **Framework**: Vitest with Node environment.
+
+## Running Tests
+
+- `pnpm test:run` — all unit tests
+- `pnpm test:e2e` — E2E tests (requires `pnpm dev` running on port 3000)
+- `pnpm lint` — ESLint with zero warnings policy
+
+## Patterns
+
+```typescript
+import { describe, it, expect } from 'vitest';
+
+describe('moduleName', () => {
+  describe('functionName', () => {
+    it('does expected behavior', () => {
+      const result = functionName(input);
+      expect(result).toEqual(expected);
+    });
+  });
+});
+```
+
+## Rules
+
+- Use `describe` blocks grouped by module, nested by function/feature.
+- Prefer `toEqual` for objects/arrays, `toBe` for primitives.
+- Prefix unused params with `_` to satisfy the linter.
+- When adding new functionality, add tests in the colocated `__tests__/` directory.
+- E2E tests use helper classes (e.g., `E2EClient`) to interact with the API.
