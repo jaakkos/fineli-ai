@@ -63,6 +63,10 @@ function rateLimit(pathname: string, ip: string): { ok: boolean; remaining: numb
 }
 
 export function middleware(request: NextRequest) {
+  if (process.env.DISABLE_RATE_LIMIT === 'true') {
+    return NextResponse.next();
+  }
+
   const pathname = request.nextUrl.pathname;
   const limit = LIMITS[pathname];
   if (limit == null) {
