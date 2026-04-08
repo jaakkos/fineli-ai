@@ -25,7 +25,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.90.21",
     "date-fns": "^4.1.0",
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "^0.45.2",
     "exceljs": "^4.4.0",
     "flexsearch": "^0.8.2",
     "jose": "^6.1.3",
